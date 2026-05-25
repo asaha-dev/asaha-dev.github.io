@@ -243,13 +243,11 @@ article > p:first-of-type {
 }
 
 .article-body a:not(.work-nav a) {
-  text-decoration: none;
+  text-decoration: none !important;
+  color: #6ecad6 !important;
+  font-weight: 500;
 }
 
-.article-body a:not(.work-nav a)::after {
-  content: " [link]";
-  font-size: 0.8em;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  opacity: 0.6;
+.article-body strong {
+  font-weight: 600;
 }
