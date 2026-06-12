@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arpita Saha - How I Think About Evaluation</title>
-  <meta name="description" content="My thinking on evaluation has shifted a lot. I used to reach for more data, better benchmarks, tighter metrics when evaluation felt off. In practice, even well-…">
+  <title>Arpita Saha - Evaluation - Progress Vs Decision Support</title>
+  <meta name="description" content="My thinking on evaluation has shifted a lot. I used to reach for better benchmarks, tighter metrics when evaluation felt off. In practice, even well-designed me…">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400&family=Poppins:ital,wght@0,300;0,400;0,500;1,300&family=Ubuntu:ital,wght@0,300;0,400;1,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -29,7 +29,7 @@
     
 <article>
   <div class="article-header">
-    <h1>how I think about evaluation</h1>
+    <h1>evaluation - progress vs decision support</h1>
     <div class="article-meta">
       
       
@@ -54,28 +54,28 @@
       
       <div class="toc-item"><a href="https://asaha-dev.github.io/notes/evals/#evaluation-is-about-adjudication">evaluation is about adjudication</a></div>
       
-      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/evals/#my-learnings">my learnings</a></div>
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/evals/#what-good-looks-like-in-practice">what good looks like in practice</a></div>
       
     </div>
   </nav>
   
 
   <div class="article-body">
-    <p>My thinking on evaluation has shifted a lot. I used to reach for more data, better benchmarks, tighter metrics when evaluation felt off. In practice, even well-designed metrics break down under pressure. They stop being signals. They become shields — reassurance that progress is happening, not decision support.</p>
+    <p>My thinking on evaluation has shifted a lot. I used to reach for better benchmarks, tighter metrics when evaluation felt off. In practice, even well-designed metrics break down under pressure and stop being signals. They sometimes become shields — reassurance that progress is happening, but does not provide decision support.</p>
 <span id="continue-reading"></span>
-<p>In my opinion, this is not a data or metrics definition problem. It is an ownership problem.</p>
+<p>What I have learnt from experience is that evaluations for decision support is not a data or metrics definition problem. It is an ownership problem.</p>
 <h3 id="evaluation-is-about-adjudication">evaluation is about adjudication</h3>
-<p>Evaluation drives actual choices: do we ship, do we delay, do we stop? When the team building the system also defines and interprets the evaluation metrics, subtle bias is almost inevitable. Not bad intent. Their incentives are simply aligned toward progress, not constraint.</p>
-<p>The fix is not technical. It is structural.</p>
-<p>The right owner is not the development team alone. It is a domain-accountable product leader: someone who understands how the system is used, is senior enough to block launches, and will personally absorb the consequences if it fails. Skin in the game.</p>
+<p>Evaluation drives actual choices: do we ship, do we delay, do we stop?</p>
+<p>When the team building the system defines and interprets the evaluation metrics, subtle bias is almost inevitable. Not bad intent. The incentives are simply aligned toward progress, not constraint.</p>
+<p>The fix is not technical - it is structural.</p>
+<p>The right owner of decision matrix is not the development team alone. It should include a domain-accountable product leader: someone who understands how the solution is used, is senior enough to block launches, and will personally absorb the consequences if it fails - skin in the game. This is not about technical fluency - the product leader does not need to define the metrics - but they need to own the decision that those metrics drive. They need to be able to read what the metrics are saying and act on it.</p>
 <p>Evaluation ownership without decision authority is symbolic. Decision authority without accountability is dangerous.</p>
 <p>The evaluation owner defines what "good" means in the real world, sets kill criteria and launch gates, and owns the final ship/no-ship decision. The development team ensures evaluation is technically sound. The evaluation owner ensures it actually constrains action. Both are essential and they are not interchangeable.</p>
-<p>Getting this right also means getting the right people in the room when benchmarks are designed. The domain SME and the end-user function need to be part of that process. The SME knows what failure looks like in the domain, often in ways that don't show up in aggregate metrics. The end-user function knows how the system is actually being used — these are the folks talking to our users and selling the product. Evaluation metrics need to include benchmarks they understand, are familiar with, and can contribute to.</p>
-<p>I have learnt that when all of these are in place, the behavior shifts in concrete ways. Metrics get tied to decisions, not just reporting. Kill criteria get defined before launch. Tradeoffs get debated explicitly rather than papered over.</p>
-<p>I have observed this gap in medical AI, in content systems, in enterprise tooling. The model clears the benchmark. Real-world users still can't trust it, because the benchmark was asking the wrong question.</p>
-<h3 id="my-learnings">my learnings</h3>
-<p>When reviewing AI systems — foundation models and applied products both — the things I check: who is accountable for these metrics, what decision would actually change if the signals got worse, where the team might be overconfident, and what uncertainty is being accepted without being named.</p>
-<p>Most costly failures are not caused by missing metrics. They come down to unclear ownership and a reluctance to make hard calls.</p>
+<p>Getting this right also means getting the right people in the room when the benchmarks and metrics are designed. The domain SME and the end-user function need to be part of that process. The SME knows what failure looks like in the domain, often in ways that don't show up in aggregate metrics. The end-user function knows how the system is actually being used — these are the folks talking to our users and selling the product. Evaluation metrics need to include benchmarks they understand, are familiar with, and can contribute to.</p>
+<p>I have experienced this gap across domains - in medical AI, in content systems, in enterprise solutions. The model clears the benchmark. Users still can't trust it, because the benchmark was asking the wrong question.</p>
+<h3 id="what-good-looks-like-in-practice">what good looks like in practice</h3>
+<p>When these structures are in place, a few things become possible. Metrics get tied to decisions, not just reporting. The development team is now armed with an answer to: what decision would actually change if this metric got worse? Kill criteria are defined and tradeoffs are named explicitly.</p>
+<p>Most costly failures are not caused by missing metrics. They come down to unclear ownership and poorly defined success criteria.</p>
 
   </div>
 </article>
@@ -84,9 +84,9 @@
 <nav class="post-nav">
   
   
-  <a class="post-nav-item post-nav-next" href="https:&#x2F;&#x2F;asaha-dev.github.io&#x2F;notes&#x2F;socratic-leadership&#x2F;">
+  <a class="post-nav-item post-nav-next" href="https:&#x2F;&#x2F;asaha-dev.github.io&#x2F;notes&#x2F;leadership-lessons&#x2F;">
     <span class="nav-dir">Next →</span>
-    <span class="nav-title">my leadership style is socratic</span>
+    <span class="nav-title">leadership lessons</span>
   </a>
   
 </nav>
