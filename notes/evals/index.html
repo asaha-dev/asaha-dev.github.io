@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arpita Saha - Evaluation - Progress Vs Decision Support</title>
-  <meta name="description" content="My thinking on evaluation has shifted a lot. I used to reach for better benchmarks, tighter metrics when evaluation felt off. In practice, even well-designed me…">
+  <title>Arpita Saha - Evaluation - Measuring Progress Vs Decision Support</title>
+  <meta name="description" content="Evaluation often drives some of the most consequential choices teams make. Should we ship? Should we delay? Should we stop investing in a direction altogether? …">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400&family=Poppins:ital,wght@0,300;0,400;0,500;1,300&family=Ubuntu:ital,wght@0,300;0,400;1,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -29,12 +29,12 @@
     
 <article>
   <div class="article-header">
-    <h1>evaluation - progress vs decision support</h1>
+    <h1>evaluation - measuring progress vs decision support</h1>
     <div class="article-meta">
       
       
       
-        &middot; 3 min read
+        &middot; 5 min read
       
       
         &middot;
@@ -61,35 +61,28 @@
   
 
   <div class="article-body">
-    <p>My thinking on evaluation has shifted a lot. I used to reach for better benchmarks, tighter metrics when evaluation felt off. In practice, even well-designed metrics break down under pressure and stop being signals. They sometimes become shields — reassurance that progress is happening, but does not provide decision support.</p>
-<span id="continue-reading"></span>
-<p>What I have learnt from experience is that evaluations for decision support is not a data or metrics definition problem. It is an ownership problem.</p>
-<h3 id="evaluation-is-about-adjudication">evaluation is about adjudication</h3>
-<p>Evaluation drives actual choices: do we ship, do we delay, do we stop?</p>
-<p>When the team building the system defines and interprets the evaluation metrics, subtle bias is almost inevitable. Not bad intent. The incentives are simply aligned toward progress, not constraint.</p>
-<p>The fix is not technical - it is structural.</p>
-<p>The right owner of decision matrix is not the development team alone. It should include a domain-accountable product leader: someone who understands how the solution is used, is senior enough to block launches, and will personally absorb the consequences if it fails - skin in the game. This is not about technical fluency - the product leader does not need to define the metrics - but they need to own the decision that those metrics drive. They need to be able to read what the metrics are saying and act on it.</p>
-<p>Evaluation ownership without decision authority is symbolic. Decision authority without accountability is dangerous.</p>
-<p>The evaluation owner defines what "good" means in the real world, sets kill criteria and launch gates, and owns the final ship/no-ship decision. The development team ensures evaluation is technically sound. The evaluation owner ensures it actually constrains action. Both are essential and they are not interchangeable.</p>
-<p>Getting this right also means getting the right people in the room when the benchmarks and metrics are designed. The domain SME and the end-user function need to be part of that process. The SME knows what failure looks like in the domain, often in ways that don't show up in aggregate metrics. The end-user function knows how the system is actually being used — these are the folks talking to our users and selling the product. Evaluation metrics need to include benchmarks they understand, are familiar with, and can contribute to.</p>
-<p>I have experienced this gap across domains - in medical AI, in content systems, in enterprise solutions. The model clears the benchmark. Users still can't trust it, because the benchmark was asking the wrong question.</p>
+    <p>Evaluation often drives some of the most consequential choices teams make. Should we ship? Should we delay? Should we stop investing in a direction altogether? At its core, evaluation exists to support these decisions.</p>
+<p>Yet when you ask a model or system development team how they evaluate their work, the conversation usually begins with metrics. Teams can often describe a broad collection of benchmarks, scores and performance indicators. What is less common is a clear articulation of how those metrics connect to the decisions being made. Which metric would actually cause a launch to be delayed? Which benchmark would justify additional investment? Which result would make us reconsider the direction entirely? Without that connection, evaluation can become an exercise in measuring progress rather than supporting decisions.</p>
+<span id="continue-reading"></span><h3 id="evaluation-is-about-adjudication">evaluation is about adjudication</h3>
+<p>I find it useful to think of evaluation as a form of adjudication. The purpose of a metric is not simply to describe a system. Its purpose is to help resolve uncertainty around a decision.</p>
+<p>Viewed this way, most metrics should have an associated question. What decision would change if this number became worse? What decision would become easier if it improved? If we cannot identify the decision that a metric informs, then the metric is likely serving a reporting function rather than a decision-making function.</p>
+<p>Reporting is not inherently bad. Teams need visibility into progress, trends, and system behavior. The problem arises when reporting metrics are mistaken for decision metrics. A dashboard can provide a comforting sense of measurement while doing little to help answer whether a system is ready to launch or whether a particular risk is acceptable.</p>
+<p>This distinction becomes especially important when the team building the system is also responsible for defining its evaluation framework. Most teams naturally gravitate toward measuring what they can measure reliably. The resulting benchmarks are often technically rigorous and highly reproducible. However, what is easiest to measure is not always what a decision-maker needs to know.</p>
+<p>As a result, evaluation can drift toward demonstrating improvement rather than reducing uncertainty. The benchmark shows that the model is better than it was before, but it does not necessarily establish whether the model is good enough for the context in which it will be used — a challenge that is fundamentally organizational rather than technical.</p>
+<p>Meaningful evaluation requires the participation of people beyond the development team. Domain experts understand what failure looks like in practice, often in ways that are difficult to capture through aggregate metrics. Customer-facing teams understand how the system is actually used and where users struggle to build trust. Product leaders understand the tradeoffs between risk, capability, and business value.</p>
+<p>Each perspective contributes a different piece of the picture. Without them, it is easy to end up with metrics that the development team trusts but that do not provide sufficient confidence for the people responsible for making deployment decisions.</p>
+<p>Ultimately, the most important stakeholder in an evaluation process is the person accountable for the decision itself. This is often a leader who understands how the system will be used, has the authority to block a launch, and will bear the consequences if the system fails. Their responsibility is not necessarily to define the metrics, but to define the question that the metrics must answer.</p>
+<p>Once that question is clear, evaluation becomes much easier to reason about. Metrics are no longer collected because they are available. They are collected because they reduce uncertainty around a specific decision.</p>
+<p>This is also where launch gates and kill criteria become valuable. When thresholds are defined before results are known, metrics become constraints rather than retrospective justifications. A metric matters because crossing a threshold changes a decision. If no decision changes, then the threshold was never meaningful in the first place.</p>
+<p>I have seen variations of this challenge across domains, from healthtech domains to content systems to enterprise software. In many cases, the model performs well on the benchmark that was selected. Yet users remain reluctant to trust the system. Looking back, the issue is often not that the benchmark was incorrect. Rather, the benchmark was answering a different question from the one users were asking.</p>
 <h3 id="what-good-looks-like-in-practice">what good looks like in practice</h3>
-<p>When these structures are in place, a few things become possible. Metrics get tied to decisions, not just reporting. The development team is now armed with an answer to: what decision would actually change if this metric got worse? Kill criteria are defined and tradeoffs are named explicitly.</p>
-<p>Most costly failures are not caused by missing metrics. They come down to unclear ownership and poorly defined success criteria.</p>
+<p>When evaluation is designed around decisions, the relationship between metrics and outcomes becomes much clearer.</p>
+<p>Every metric can be traced back to a specific uncertainty that someone is trying to resolve. Tradeoffs are identified explicitly rather than emerging late in the process. Teams understand not only what is being measured, but why it is being measured and what action the result enables.</p>
+<p>Evaluation becomes a shared responsibility rather than a technical artifact owned exclusively by the development team. The people building the system, the people using the system, and the people accountable for the decision all contribute to defining what success means.</p>
 
   </div>
 </article>
 
-
-<nav class="post-nav">
-  
-  
-  <a class="post-nav-item post-nav-next" href="https:&#x2F;&#x2F;asaha-dev.github.io&#x2F;notes&#x2F;leadership-lessons&#x2F;">
-    <span class="nav-dir">Next →</span>
-    <span class="nav-title">leadership lessons</span>
-  </a>
-  
-</nav>
 
 
   </main>
