@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Arpita Saha - Context And Memory</title>
-  <meta name="description" content="Recently I have been spending time digging deeper into context engineering and memory systems for agents. Here are some of my notes.
-Firstly, lets create a ment…">
+  <meta name="description" content="Recently I have been spending time digging deeper into context engineering and memory systems for agents. Here are some of my notes.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400&family=Poppins:ital,wght@0,300;0,400;0,500;1,300&family=Ubuntu:ital,wght@0,300;0,400;1,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -75,6 +74,7 @@ Firstly, lets create a ment…">
 
   <div class="article-body">
     <p>Recently I have been spending time digging deeper into context engineering and memory systems for agents. Here are some of my notes.</p>
+<span id="continue-reading"></span>
 <p>Firstly, lets create a mental model of the different terminologies:</p>
 <pre><code>Context answers:
 &quot;What is available right now?&quot;
@@ -88,7 +88,6 @@ Memory answers:
 Learning answers:
 &quot;What changed the system itself?&quot;
 </code></pre>
-<span id="continue-reading"></span>
 <p>Many discussions collapse these concepts into a single bucket called memory. Architecturally they are different systems solving different problems.</p>
 <p>When a model references something mentioned 50,000 tokens earlier, it has not remembered it in the way we typically think about memory. The information never left the active working set. The model can still attend to those tokens because they remain inside the context window.</p>
 <p>Nothing was persisted. Nothing was selectively retained. Nothing was recalled from storage.</p>
