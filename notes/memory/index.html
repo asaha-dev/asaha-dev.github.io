@@ -56,17 +56,17 @@
       
       <div class="toc-item"><a href="https://asaha-dev.github.io/notes/memory/#the-mcp-lesson">the MCP lesson</a></div>
       
-      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/memory/#retrieval-is-not-memory-either">Retrieval is not memory either</a></div>
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/memory/#retrieval-is-not-memory-either">retrieval is not memory either</a></div>
       
       <div class="toc-item"><a href="https://asaha-dev.github.io/notes/memory/#memory-is-selective-retention">memory is selective retention</a></div>
       
-      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/memory/#state-is-not-memory">State is not memory</a></div>
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/memory/#state-is-not-memory">state is not memory</a></div>
       
-      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/memory/#remembering-is-not-learning">Remembering is not learning</a></div>
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/memory/#remembering-is-not-learning">remembering is not learning</a></div>
       
       <div class="toc-item"><a href="https://asaha-dev.github.io/notes/memory/#what-the-industry-is-rebuilding">what the industry is rebuilding</a></div>
       
-      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/memory/#failure-diagnosis">Failure diagnosis</a></div>
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/memory/#failure-diagnosis">failure diagnosis</a></div>
       
     </div>
   </nav>
@@ -112,7 +112,7 @@ Learning answers:
 <p>The problem is not simply cost - it is competition. Context is a shared resource. Tool schemas compete with retrieved documents, conversation history, instructions, intermediate reasoning, and task-specific information.  Jira's MCP schema alone accounts for around 17,000 tokens. Anthropic's internal tooling hit 134,000 tokens of tool definitions before optimization work began. A single workflow connecting Google Drive to Salesforce via MCP consumed 150,000 tokens before code-execution-based deferred loading reduced that to 2,000 — a 98.7% reduction on that task.</p>
 <p>Anthropic's tool-search work demonstrates a simple but important idea: load information only when it is needed.</p>
 <p>The lesson is broader than tools. Systems frequently improve when irrelevant context is removed rather than when additional context is added. This is not memory being improved through larger context windows. It is retrieval being improved through selective loading.</p>
-<h2 id="retrieval-is-not-memory-either">Retrieval is not memory either</h2>
+<h2 id="retrieval-is-not-memory-either">retrieval is not memory either</h2>
 <p>It is tempting to replace one misconception with another. If long context is not memory, retrieval is not memory either. A vector database, search index, or retrieval system primarily answers:</p>
 <blockquote>
 <p>What information can I find?</p>
@@ -139,7 +139,7 @@ Memory    = persistence + abstraction + retrieval
 <p>Viewed through this lens, most memory architectures are forms of selective representation.</p>
 <p>Conversation summaries compress interaction history into reusable state. Episodic memories compress events into records. Knowledge graphs compress information into entities and relationships. Retrieval systems compress large corpora into searchable representations.</p>
 <p>The challenge is not storage. Storage is cheap. The challenge is deciding what should survive after the context window is gone.</p>
-<h2 id="state-is-not-memory">State is not memory</h2>
+<h2 id="state-is-not-memory">state is not memory</h2>
 <p>Another distinction that frequently gets blurred is the difference between memory and state. Memory answers questions about the past.</p>
 <ul>
 <li>What happened?</li>
@@ -154,7 +154,7 @@ Memory    = persistence + abstraction + retrieval
 </ul>
 <p>Checklists, task graphs, scratchpads, execution plans, and workflow trackers are primarily state-management systems.</p>
 <p>Many successful agents combine both. Memory preserves information across interactions. State preserves continuity within an interaction.</p>
-<h2 id="remembering-is-not-learning">Remembering is not learning</h2>
+<h2 id="remembering-is-not-learning">remembering is not learning</h2>
 <p>Long-term memory and learning are often treated as the same phenomenon. They are not. Memory changes what information is available to the system. Learning changes how the system behaves.</p>
 <p>A stored user preference affects future decisions because the information can be recalled. A fine-tuned model behaves differently because its parameters changed. The former is persistence. The latter is adaptation.</p>
 <p>This distinction is particularly important when discussing procedural memory. Current AI systems primarily acquire durable behavioral changes through training, fine-tuning, reinforcement learning, or other parameter updates.</p>
@@ -170,27 +170,23 @@ Memory    = persistence + abstraction + retrieval
 </ul>
 <p>These are often discussed independently, but they are solving related problems. They decide what remains active, what gets stored, what gets compressed, and what gets forgotten. The emerging picture looks less like a single memory system and more like a memory hierarchy.</p>
 <blockquote>
-<p>Context functions as working memory.</p>
+<p>Context functions as working memory.
+Retrieval provides access.
+Memory preserves useful abstractions.
+Learning changes the system itself.</p>
 </blockquote>
-<blockquote>
-<p>Retrieval provides access.</p>
-</blockquote>
-<blockquote>
-<p>Memory preserves useful abstractions.</p>
-</blockquote>
-<blockquote>
-<p>Learning changes the system itself.</p>
-</blockquote>
-<h2 id="failure-diagnosis">Failure diagnosis</h2>
+<h2 id="failure-diagnosis">failure diagnosis</h2>
 <p>When an agent loses continuity, the failure is often blamed on context length or model capability. The underlying issue is frequently architectural.</p>
-<p>** Weak retrieval.</p>
-<p>** Poor memory formation.</p>
-<p>** Missing state management.</p>
-<p>** No compression strategy.</p>
-<p>** No persistence strategy.</p>
-<p>** A larger context window often postpones these failures rather than solving them.</p>
-<p>The diagnostic question is not whether the model can still see the information. The more important question is:
-<strong>What information deserves to survive after the window is gone?</strong></p>
+<ul>
+<li>Weak retrieval.</li>
+<li>Poor memory formation.</li>
+<li>Missing state management.</li>
+<li>No compression strategy.</li>
+<li>No persistence strategy.</li>
+<li>A larger context window often postpones these failures rather than solving them.</li>
+</ul>
+<p>The diagnostic question is not whether the model can still see the information. The more important question is: <strong>What information deserves to survive after the window is gone?</strong></p>
+<hr />
 <p>My notes from:</p>
 <ul>
 <li><a rel="external" href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Effective context engineering for AI agents</a></li>
