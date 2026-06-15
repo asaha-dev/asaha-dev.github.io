@@ -249,12 +249,12 @@ article > p:first-of-type {
 }
 
 .article-body strong {
-  color: var(--text);
+  color: #111;
   font-weight: 700;
 }
 
 .article-body em {
-  color: var(--text);
+  color: #222;
   font-style: italic;
   font-weight: 500;
 }
