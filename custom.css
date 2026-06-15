@@ -250,6 +250,7 @@ article > p:first-of-type {
 
 .article-body strong {
   color: #111;
+  font-family: var(--font-sans);
   font-weight: 700;
 }
 
