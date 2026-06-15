@@ -52,11 +52,11 @@
     <div class="toc-label">in this post</div>
     <div class="toc-items">
       
-      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#lens-1-architecture-and-design-where-the-flat-loop-breaks">lens 1: architecture and design — where the flat loop breaks</a></div>
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#lens-1-architecture-and-design-where-the-flat-loop-breaks">lens 1: architecture and design: where the flat loop breaks</a></div>
       
-      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#lens-2-build-and-framework-choices-what-to-own-directly">lens 2: build and framework choices — what to own directly</a></div>
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#lens-2-build-and-framework-choices-what-to-own-directly">lens 2: build and framework choices: what to own directly</a></div>
       
-      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#lens-3-strategy-and-organization-how-to-make-decisions">lens 3: strategy and organization — how to make decisions</a></div>
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#lens-3-strategy-and-organization-how-to-make-decisions">lens 3: strategy and organization: how to make decisions</a></div>
       
       <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#does-the-model-eat-the-harness">Does the model eat the harness?</a></div>
       
@@ -69,9 +69,9 @@
   <div class="article-body">
     <p>I've been thinking through the shift from ReAct loops to engineered agent harnesses. ReAct is still a useful mental model, but the loop by itself no longer explains where production agent systems succeed or fail.</p>
 <span id="continue-reading"></span>
-<p><em>This is the first post in a series on LLM systems: why the industry is moving away from "just give the model more context" and toward explicit memory formation, orchestration systems and harness engineering. The series goes deeper in <a href="/notes/context-memory">context and memory</a>, <a href="/notes/systems-transformers">building systems around transformers</a>, and <a href="/notes/claude-code-systems-deep-dive">Claude Code — a systems architecture deep dive</a>.</em></p>
+<p><em>This is the first post in a series on LLM systems: why the industry is moving away from "just give the model more context" and toward explicit memory formation, orchestration systems and harness engineering. The series goes deeper in <a href="/notes/context-memory">context and memory</a>, <a href="/notes/systems-transformers">building systems around transformers</a>, and <a href="/notes/claude-code-systems-deep-dive">Claude Code: a systems architecture deep dive</a>.</em></p>
 <p>The core architectural change is that the reasoning loop is no longer the whole system. It is one component inside a harness: a deterministic orchestration layer around a non-deterministic model that explicitly owns context, control flow, state, tools, and verification.</p>
-<p>ReAct was widely popular in 2022–2023 for building AI applications on large language models. The core idea was neat: let the model interleave reasoning traces with tool calls in one flat loop. Instead of forcing the LLM to either think internally and answer (<code>User → LLM → Answer</code>) or call tools immediately (<code>User → LLM → Tool → LLM → Answer</code>), you alternate between thought, action, and observation — possibly repeating — before arriving at an answer.</p>
+<p>ReAct was widely popular in 2022-2023 for building AI applications on large language models. The core idea was neat: let the model interleave reasoning traces with tool calls in one flat loop. Instead of forcing the LLM to either think internally and answer (<code>User → LLM → Answer</code>) or call tools immediately (<code>User → LLM → Tool → LLM → Answer</code>), you alternate between thought, action, and observation, possibly repeating, before arriving at an answer.</p>
 <p>For example:</p>
 <pre><code>Question:
 Who is the current CEO of Nvidia?
@@ -91,39 +91,39 @@ I found the answer.
 Answer:
 Jensen Huang
 </code></pre>
-<p>This became the blueprint for most modern agents. ReAct became the dominant pattern for early LangChain agents and tool-calling implementations. LangGraph later emerged as a more structured alternative — adding explicit state and control flow in response to the flat loop's limitations at scale.</p>
-<p>An agent harness is the systems idea that wraps it. The harness is what you build around the model for a specific task. A framework — LangChain, LangGraph, CrewAI, an SDK — is tooling that helps you build a harness, or provides one off the shelf. The distinction matters because the harness is where context, state, verification, and recovery decisions live.</p>
-<p>A useful canonical harness loop is <code>gather context → take action → verify work → repeat</code>. The verify stage is a meaningful addition that classic ReAct does not have — it externalises judgment rather than asking the model to self-critique.</p>
+<p>This became the blueprint for most modern agents. ReAct became the dominant pattern for early LangChain agents and tool-calling implementations. LangGraph later emerged as a more structured alternative, adding explicit state and control flow in response to the flat loop's limitations at scale.</p>
+<p>An agent harness is the systems idea that wraps it. The harness is what you build around the model for a specific task. Frameworks like LangChain, LangGraph, CrewAI, or other SDKs are tooling that helps you build a harness, or provides one off the shelf. The distinction matters because the harness is where context, state, verification, and recovery decisions live.</p>
+<p>A useful canonical harness loop is <code>gather context → take action → verify work → repeat</code>. The verify stage is a meaningful addition that classic ReAct does not have: it externalises judgment rather than asking the model to self-critique.</p>
 <p>I find the transition easiest to reason about through three lenses:</p>
-<h2 id="lens-1-architecture-and-design-where-the-flat-loop-breaks">lens 1: architecture and design — where the flat loop breaks</h2>
+<h2 id="lens-1-architecture-and-design-where-the-flat-loop-breaks">lens 1: architecture and design: where the flat loop breaks</h2>
 <p>A pure ReAct loop dumps every thought, action, and observation into one growing context window. That works surprisingly well for short tasks. It starts to fail when the loop becomes the only place where state lives.</p>
 <p>The failure mode is not simply that the model forgets. The context window fills with stale plans, abandoned hypotheses, intermediate outputs, tool traces, and partial decisions. Even when the model can technically see the tokens, the relevant state has to compete with everything else.</p>
 <p>The architecture that addresses this usually separates three things:</p>
 <blockquote>
-<p><strong>session</strong> — an append-only event log that survives failures and restarts.<br />
-<strong>harness</strong> — the orchestration layer that decides what context to load, what action to take, and how to verify it.<br />
-<strong>sandbox</strong> — the execution boundary for tools, shell commands, browser checks, code execution, or remote environments.</p>
+<p><strong>session:</strong> an append-only event log that survives failures and restarts.<br />
+<strong>harness:</strong> the orchestration layer that decides what context to load, what action to take, and how to verify it.<br />
+<strong>sandbox:</strong> the execution boundary for tools, shell commands, browser checks, code execution, or remote environments.</p>
 </blockquote>
 <p>This split matters because the flat loop has no durable place to put truth. Imagine an agent refactoring a codebase. It investigates three approaches, abandons one after tests fail, edits several files, and then gets compacted. If all of that lives only in the conversation, the next model call has to infer current state from a compressed narrative. The summary may preserve the final decision but lose why an earlier approach failed. It may preserve the todo list but lose which tests already ran.</p>
-<p>In a harnessed system, those categories separate - the repository records the actual state of the work; a progress file or task list records what remains and the session log records what happened. The sandbox provides the execution boundary. The model can still reason over all of this, but it is no longer responsible for being the only state store.</p>
+<p>In a harnessed system, those categories separate. The repository records the actual state of the work; a progress file or task list records what remains; and the session log records what happened. The sandbox provides the execution boundary. The model can still reason over all of this, but it is no longer responsible for being the only state store.</p>
 <p><strong>Q1. What design choices are critical?</strong></p>
 <div class="answer-indent">
 <p><strong>a. State.</strong> Compaction alone is not enough because state lives in artifacts, not in the context window. Progress files, task lists, session logs, repositories, and test results give the system durable places to put truth.</p>
-<p><strong>b. Evaluation.</strong> Separate the doer from the judge. A standalone evaluator is more tunable than asking the generator to validate its own work. Rules-based verification — linting, tests, visual checks — still matters.</p>
+<p><strong>b. Evaluation.</strong> Separate the doer from the judge. A standalone evaluator is more tunable than asking the generator to validate its own work. Rules-based verification, including linting, tests, and visual checks, still matters.</p>
 </div>
-<h2 id="lens-2-build-and-framework-choices-what-to-own-directly">lens 2: build and framework choices — what to own directly</h2>
-<p>The question of which framework to use is real, but it is downstream of a more important one: how much of the harness do you want to own directly? A framework gives you pre-built abstractions — graph nodes, agent roles, tool connectors, memory stores — in exchange for structural decisions made on your behalf. When those decisions match your task, frameworks accelerate. When they don't, they add layers to debug between you and the loop.</p>
+<h2 id="lens-2-build-and-framework-choices-what-to-own-directly">lens 2: build and framework choices: what to own directly</h2>
+<p>The question of which framework to use is real, but it is downstream of a more important one: how much of the harness do you want to own directly? A framework gives you pre-built abstractions, such as graph nodes, agent roles, tool connectors, and memory stores, in exchange for structural decisions made on your behalf. When those decisions match your task, frameworks accelerate. When they don't, they add layers to debug between you and the loop.</p>
 <p>The build-your-own-first philosophy resonates with me here. Start close to the API when the patterns are simple, and use a framework when you understand enough of the loop to know which complexity it is taking off your plate.</p>
 <p><strong>Q1. How do I choose an appropriate framework?</strong></p>
 <div class="answer-indent">
 <p>Use a raw loop and direct API when you want to understand the harness and the patterns are simple. Use a framework or SDK when you want harness concerns solved for you: automatic compaction, sub-agent context isolation, permissions, tool execution, or first-class verification. Use LangGraph when you need explicit graph or state-machine control over deterministic orchestration.</p>
-<p>The risk shows up when the framework owns the part of the system where the product differentiates: what context gets loaded, what state survives, how work is verified, how failures recover, and how evals map to user trust. Those are not incidental implementation details. They are often the product behavior.
+<p>The risk shows up when the framework owns the part of the system where the product differentiates: what context gets loaded, what state survives, how work is verified, how failures recover, and how evals map to user trust. Those are not incidental implementation details. They are often the product behavior.</p>
 </div>
 <p><strong>Q2. What should I avoid outsourcing?</strong></p>
 <div class="answer-indent">
-<p>The parts of the loop where the product differentiates: how context gets curated, what state survives, how work is verified, how failures recover, and how evals map to user trust. The framework is not the moat - the harness, context curation, and evals are.</p>
+<p>The parts of the loop where the product differentiates: how context gets curated, what state survives, how work is verified, how failures recover, and how evals map to user trust. The framework is not the moat; the harness, context curation, and evals are.</p>
 </div>
-<h2 id="lens-3-strategy-and-organization-how-to-make-decisions">lens 3: strategy and organization — how to make decisions</h2>
+<h2 id="lens-3-strategy-and-organization-how-to-make-decisions">lens 3: strategy and organization: how to make decisions</h2>
 <p>Some of the questions that come up in practice:</p>
 <p><strong>Q1. Where does durable advantage live?</strong></p>
 <div class="answer-indent">
@@ -131,7 +131,7 @@ Jensen Huang
 </div>
 <p><strong>Q2. Build vs buy</strong></p>
 <div class="answer-indent">
-<p>If starting today, I would build a thin direct-API wrapper first to learn where the tasks actually break — then adopt a framework only once I understand the loop well enough to know what it's hiding from me. The org's capability to build the harness is the asset. Outsourcing the harness outsources the most valuable part.</p>
+<p>If starting today, I would build a thin direct-API wrapper first to learn where the tasks actually break. Then I would adopt a framework only once I understand the loop well enough to know what it's hiding from me. The org's capability to build the harness is the asset. Outsourcing the harness outsources the most valuable part.</p>
 </div>
 <p><strong>Q3. How to frame the transition to stakeholders</strong></p>
 <div class="answer-indent">
@@ -139,7 +139,7 @@ Jensen Huang
 </div>
 <p><strong>Q4. Which pattern for which job?</strong></p>
 <div class="answer-indent">
-<p>The field debate between single and multi-agent could not be louder. However, my read is that the strongest arguments on both sides are not actually contradicting each other — they are describing different tasks. The productive question is not which camp is right but which pattern fits the work.</p>
+<p>The field debate between single and multi-agent could not be louder. However, my read is that the strongest arguments on both sides are not actually contradicting each other. They are describing different tasks. The productive question is not which camp is right but which pattern fits the work.</p>
 <p>Use a single-agent pattern for dependency-heavy, coherent-output work: code, documents, anything where later steps depend on earlier ones. Use multi-agent patterns for parallelisable, breadth-first work: research, competitive analysis, broad search, synthesis. Design the interfaces before the agents so the pattern choice remains reversible.</p>
 </div>
 <h2 id="does-the-model-eat-the-harness">Does the model eat the harness?</h2>
@@ -151,17 +151,17 @@ Jensen Huang
 <h2 id="what-i-was-reading">What I was reading</h2>
 <p>Papers:</p>
 <ul>
-<li><a rel="external" href="https://arxiv.org/abs/2210.03629">ReAct: Synergizing Reasoning and Acting in Language Models</a> — 2022</li>
-<li><a rel="external" href="https://arxiv.org/abs/2307.03172">Lost in the middle: how language models use long contexts</a> — 2023</li>
-<li><a rel="external" href="https://arxiv.org/abs/2404.13076">Self-preference bias in LLM evaluation (arXiv 2404.13076)</a> — NeurIPS 2024</li>
-<li><a rel="external" href="https://arxiv.org/abs/2505.06120">LLMs Get Lost In Multi-Turn Conversation</a> — 2025</li>
-<li><a rel="external" href="https://arxiv.org/abs/2502.18864">Towards an AI co-scientist</a> — Google DeepMind, February 2025</li>
+<li><a rel="external" href="https://arxiv.org/abs/2210.03629">ReAct: Synergizing Reasoning and Acting in Language Models</a>, 2022</li>
+<li><a rel="external" href="https://arxiv.org/abs/2307.03172">Lost in the middle: how language models use long contexts</a>, 2023</li>
+<li><a rel="external" href="https://arxiv.org/abs/2404.13076">Self-preference bias in LLM evaluation (arXiv 2404.13076)</a>, NeurIPS 2024</li>
+<li><a rel="external" href="https://arxiv.org/abs/2505.06120">LLMs Get Lost In Multi-Turn Conversation</a>, 2025</li>
+<li><a rel="external" href="https://arxiv.org/abs/2502.18864">Towards an AI co-scientist</a>, Google DeepMind, February 2025</li>
 </ul>
 <p>Anthropic research and engineering blog (some of my favorite posts to read):</p>
 <ul>
 <li><a rel="external" href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Effective context engineering for AI agents</a></li>
 <li><a rel="external" href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents">Effective harnesses for long-running agents</a></li>
-<li><a rel="external" href="https://www.anthropic.com/news/claude-for-life-sciences">Claude for life sciences</a> — October 2025</li>
+<li><a rel="external" href="https://www.anthropic.com/news/claude-for-life-sciences">Claude for life sciences</a>, October 2025</li>
 <li><a rel="external" href="https://docs.anthropic.com/en/docs/claude-code/sdk">Claude Agent SDK</a></li>
 <li><a rel="external" href="https://www.anthropic.com/research/building-effective-agents">Building effective agents</a></li>
 <li><a rel="external" href="https://www.anthropic.com/engineering/managed-agents">Managed agents</a></li>
@@ -174,8 +174,8 @@ Jensen Huang
 </ul>
 <p>Other sources:</p>
 <ul>
-<li><a rel="external" href="https://sequoiacap.com/podcast/google-deepminds-logan-kilpatrick-why-the-model-eats-the-harness/">Why the model eats the harness</a> — Logan Kilpatrick, Sequoia Capital podcast</li>
-<li><a rel="external" href="https://x.com/Kangwook_Lee/status/2052925157606568217">Three regimes and AI-designed harnesses</a> — Kangwook Lee</li>
+<li><a rel="external" href="https://sequoiacap.com/podcast/google-deepminds-logan-kilpatrick-why-the-model-eats-the-harness/">Why the model eats the harness</a>, Logan Kilpatrick, Sequoia Capital podcast</li>
+<li><a rel="external" href="https://x.com/Kangwook_Lee/status/2052925157606568217">Three regimes and AI-designed harnesses</a>, Kangwook Lee</li>
 </ul>
 
   </div>
