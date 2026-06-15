@@ -69,7 +69,7 @@
   
 
   <div class="article-body">
-    <p>I've been thinking through the shift from ReAct loops to engineered agent harnesses — what drove it, what the architecture actually looks like, and how to drive decisions for for teams building on LLMs today.</p>
+    <p>I've been thinking through the shift from ReAct loops to engineered agent harnesses — what drove it, what the architecture actually looks like, and how to drive decisions for teams building on LLMs today.</p>
 <span id="continue-reading"></span>
 <p><em>This is the first post in a series on LLM systems: why the industry is moving away from "just give the model more context" and toward explicit memory formation, orchestration systems and harness engineering. The series goes deeper in <a href="/notes/context-memory">context and memory</a>, <a href="/notes/systems-transformers">building systems around transformers</a>, and <a href="/notes/claude-code-systems-deep-dive">Claude Code — a systems architecture deep dive</a>.</em></p>
 <p>ReAct (<a rel="external" href="https://arxiv.org/abs/2210.03629">Yao et al., 2022</a>) was widely popular in 2022–2023 for building AI applications on large language models. The core idea was neat: let the model interleave reasoning traces with tool calls in one flat loop. Instead of forcing the LLM to either think internally and answer (<code>User → LLM → Answer</code>) or call tools immediately (<code>User → LLM → Tool → LLM → Answer</code>), you alternate between thought, action, and observation — possibly repeating — before arriving at an answer.</p>
