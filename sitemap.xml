@@ -7,6 +7,9 @@
         <loc>https://asaha-dev.github.io/notes/</loc>
     </url>
     <url>
+        <loc>https://asaha-dev.github.io/notes/claude-code-systems-deep-dive/</loc>
+    </url>
+    <url>
         <loc>https://asaha-dev.github.io/notes/context-memory/</loc>
     </url>
     <url>
@@ -17,6 +20,9 @@
     </url>
     <url>
         <loc>https://asaha-dev.github.io/notes/page/1/</loc>
+    </url>
+    <url>
+        <loc>https://asaha-dev.github.io/notes/react-harness/</loc>
     </url>
     <url>
         <loc>https://asaha-dev.github.io/notes/systems-transformers/</loc>

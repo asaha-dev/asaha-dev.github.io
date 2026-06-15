@@ -41,11 +41,19 @@
 
   
     
-      
+  
+
+  
     
   
 
   
+    
+  
+
+  
+    
+      
     
   
 
@@ -62,12 +70,59 @@
       
       <div class="post-item">
         <div class="post-info">
-          <span class="post-title"><a href="https:&#x2F;&#x2F;asaha-dev.github.io&#x2F;notes&#x2F;systems-transformers&#x2F;">Why building systems around transformers</a></span><span class="post-tags">#llm #systems</span>
+          <span class="post-title"><a href="https:&#x2F;&#x2F;asaha-dev.github.io&#x2F;notes&#x2F;claude-code-systems-deep-dive&#x2F;">claude code — a systems architecture deep dive</a></span><span class="post-tags">#systems #llm</span>
         </div>
+        
+        <div class="post-excerpt">Part of a series on LLM systems: a concrete look at how one production agent system implements the architectural principles described in context and memory and building systems around transformers.
+We have all been curious about the claude code system. I dove into this paper from VILA Lab which performed a reverse-engineering analysis. These are my notes.<a href="https:&#x2F;&#x2F;asaha-dev.github.io&#x2F;notes&#x2F;claude-code-systems-deep-dive&#x2F;" class="post-excerpt-more">read more →</a></div>
         
       </div>
       
     
+      
+      <div class="post-item">
+        <div class="post-info">
+          <span class="post-title"><a href="https:&#x2F;&#x2F;asaha-dev.github.io&#x2F;notes&#x2F;react-harness&#x2F;">from ReAct to agent harness: how to think about the shift</a></span><span class="post-tags">#llm #systems #leadership</span>
+        </div>
+        
+        <div class="post-excerpt">This is the first post in a series on LLM systems: why the industry is moving away from &quot;just give the model more context&quot; and toward explicit memory formation and orchestration systems. The series goes deeper in context and memory, building systems around transformers, and Claude Code — a systems architecture deep dive.
+ReAct (Yao et al., 2022) was widely popular in 2022–2023 for building AI applications on large language models. The core idea was neat: let the model interleave reasoning traces with tool calls in one flat loop. Instead of forcing the LLM to either think internally and answer (User → LLM → Answer) or call tools immediately (User → LLM → Tool → LLM → Answer), you alternate between thought, action, and observation — possibly repeating — before arriving at an answer. For example:
+Question:
+Who is the current CEO of Nvidia?
+
+Thought:
+I need to find who the CEO is.
+
+Action:
+Search(&amp;quot;CEO Nvidia&amp;quot;)
+
+Observation:
+Jensen Huang is the founder and CEO of Nvidia.
+
+Thought:
+I found the answer.
+
+Answer:
+Jensen Huang
+
+This became the blueprint for most modern agents. ReAct became the dominant pattern for early LangChain agents and tool-calling implementations. LangGraph later emerged as a more structured alternative — adding explicit state and control flow in response to the flat loop&#x27;s limitations at scale.
+An agent harness is the systems idea that wraps it: a deterministic orchestration layer around a non-deterministic model that explicitly owns context, control flow, and verification. We are not replacing the reasoning loop — we are demoting it from the whole system to one component inside a scaffold that we engineer. The harness is what you build, specific to your task. A framework — LangChain, LangGraph, CrewAI — is tooling that helps you build a harness, or provides one off the shelf. The two are often conflated, and the difference matters more than it might seem at first.
+Anthropic&#x27;s Claude Agent SDK frames the canonical harness loop as gather context → take action → verify work → repeat. The verify stage is a meaningful addition that classic ReAct does not have — it externalises judgment rather than asking the model to self-critique.
+I explored this transition through three lenses:<a href="https:&#x2F;&#x2F;asaha-dev.github.io&#x2F;notes&#x2F;react-harness&#x2F;" class="post-excerpt-more">read more →</a></div>
+        
+      </div>
+      
+    
+      
+      <div class="post-item">
+        <div class="post-info">
+          <span class="post-title"><a href="https:&#x2F;&#x2F;asaha-dev.github.io&#x2F;notes&#x2F;systems-transformers&#x2F;">building systems around transformers</a></span><span class="post-tags">#llm #systems</span>
+        </div>
+        
+        <div class="post-excerpt">Part of a series on LLM systems: building on context and memory, this post looks at why larger context windows don&#x27;t make harness engineering obsolete — compression, state formation, and external scaffolding are where continuity actually gets solved. Claude Code deep dive.
+The latest buzzword has been harness engineering. At first glance, the recent shift seems surprising. Context windows are growing rapidly. Models can now process hundreds of thousands or even millions of tokens. If context length keeps increasing, shouldn&#x27;t memory systems, state managers, retrieval pipelines and agent harnesses become less important over time? The opposite appears to be happening.<a href="https:&#x2F;&#x2F;asaha-dev.github.io&#x2F;notes&#x2F;systems-transformers&#x2F;" class="post-excerpt-more">read more →</a></div>
+        
+      </div>
       
     
       
@@ -83,6 +138,8 @@
     
       
     
+      
+    
   </div>
 </div>
 
@@ -93,17 +150,20 @@
       
     
       
+    
+      
+    
+      
+    
+      
       <div class="post-item">
         <div class="post-info">
           <span class="post-title"><a href="https:&#x2F;&#x2F;asaha-dev.github.io&#x2F;notes&#x2F;evals&#x2F;">evaluation - measuring progress vs decision support</a></span><span class="post-tags">#evals #leadership</span>
         </div>
         
-        <div class="post-excerpt">Evaluation often drives some of the most consequential choices teams make. Should we ship? Should we delay? Should we stop investing in a direction altogether? At its core, evaluation exists to support these decisions.
-Yet when you ask a model or system development team how they evaluate their work, the conversation usually begins with metrics. Teams can often describe a broad collection of benchmarks, scores and performance indicators. What is less common is a clear articulation of how those metrics connect to the decisions being made. Which metric would actually cause a launch to be delayed? Which benchmark would justify additional investment? Which result would make us reconsider the direction entirely? Without that connection, evaluation can become an exercise in measuring progress rather than supporting decisions.<a href="https:&#x2F;&#x2F;asaha-dev.github.io&#x2F;notes&#x2F;evals&#x2F;" class="post-excerpt-more">read more →</a></div>
+        <div class="post-excerpt">Evaluation often drives some of the most consequential choices teams make. Should we ship? Should we delay? Should we stop investing in a direction altogether? At its core, evaluation exists to support these decisions.<a href="https:&#x2F;&#x2F;asaha-dev.github.io&#x2F;notes&#x2F;evals&#x2F;" class="post-excerpt-more">read more →</a></div>
         
       </div>
-      
-    
       
     
       
@@ -112,8 +172,7 @@ Yet when you ask a model or system development team how they evaluate their work
           <span class="post-title"><a href="https:&#x2F;&#x2F;asaha-dev.github.io&#x2F;notes&#x2F;leadership-lessons&#x2F;">leadership lessons</a></span><span class="post-tags">#leadership</span>
         </div>
         
-        <div class="post-excerpt">Leadership styles are often described as fixed traits. My experience has been almost the opposite. The instincts that made me effective at one stage of my career have often required recalibration as the organization changed, the work changed, and the people around me changed.
-For a long time, my default style was hands-on coaching. I stayed close to the work, shaped direction through direct input, and often built alongside the team. That worked well when the organization was smaller and the expertise gap between me and the people I led was manageable.<a href="https:&#x2F;&#x2F;asaha-dev.github.io&#x2F;notes&#x2F;leadership-lessons&#x2F;" class="post-excerpt-more">read more →</a></div>
+        <div class="post-excerpt">Leadership styles are often described as fixed traits. My experience has been almost the opposite. The instincts that made me effective at one stage of my career have often required recalibration as the organization changed, the work changed, and the people around me changed.<a href="https:&#x2F;&#x2F;asaha-dev.github.io&#x2F;notes&#x2F;leadership-lessons&#x2F;" class="post-excerpt-more">read more →</a></div>
         
       </div>
       

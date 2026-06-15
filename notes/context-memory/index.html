@@ -68,6 +68,8 @@
       
       <div class="toc-item"><a href="https://asaha-dev.github.io/notes/context-memory/#failure-diagnosis">failure diagnosis</a></div>
       
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/context-memory/#what-i-was-reading">What I was reading</a></div>
+      
     </div>
   </nav>
   
@@ -102,6 +104,7 @@ Learning answers:
 <h2 id="what-context-actually-does">what context actually does</h2>
 <p>The transformer architecture provides a form of working memory. Information remains available because it stays inside the active context window. This is extremely useful, but it has limits. I will dig deeper into this aspect in another note.</p>
 <p>The scaling problem becomes concrete quickly. Anthropic's <a rel="external" href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">context engineering research</a> documents what they call "context rot": model performance degrades measurably as the context window fills, even when the model can technically access all prior tokens. Attention dilutes across longer sequences. The <a rel="external" href="https://arxiv.org/pdf/2510.05381">"lost in the middle"</a> problem remains observable even in models with very large context windows, although newer architectures mitigate it to varying degrees. Recency bias remains strong. A 1M token window increases the working set; it does not resolve the retrieval problem within that window.</p>
+<p>The multi-turn dimension of this is underappreciated. <a rel="external" href="https://arxiv.org/abs/2505.06120">Laban et al. (2025)</a> measured an average 39% performance drop across six generation tasks in multi-turn versus single-turn settings across 200,000+ simulated conversations. The failure mode is not simply that the model forgets earlier content — it is that models make assumptions in early turns, prematurely commit to a direction, and then fail to recover when that direction proves wrong. Accumulated conversation history does not just add noise; it can lock in mistakes.</p>
 <p>The cost dimension compounds this. Standard dense transformer attention scales quadratically with sequence length, although modern architectures increasingly employ sparse, local, and approximate attention mechanisms to reduce that cost.</p>
 <p>A larger context window increases how much information can be kept active. It does not automatically solve retrieval, prioritization, or memory formation. This distinction becomes visible in production systems.</p>
 <h2 id="the-mcp-lesson">the MCP lesson</h2>
@@ -151,16 +154,20 @@ Learning changes the system itself.
 <h2 id="failure-diagnosis">failure diagnosis</h2>
 <p>When an agent loses continuity, the failure is often blamed on context length or model capability. The underlying issue is frequently architectural: retrieval that is too weak to surface what matters, no strategy for what should be compressed or persisted, missing state management, and no memory formation pipeline. A larger context window often postpones these failures rather than solving them.</p>
 <p>The more useful diagnostic question is not whether the model can still see the information, but what information deserves to survive after the window is gone.</p>
-<hr />
-<p>My notes from:</p>
+<h2 id="what-i-was-reading">What I was reading</h2>
+<p>Anthropic engineering posts — the most concrete starting point for this topic:</p>
 <ul>
 <li><a rel="external" href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Effective context engineering for AI agents</a></li>
 <li><a rel="external" href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents">Effective harnesses for long-running agents</a></li>
 <li><a rel="external" href="https://www.anthropic.com/news/contextual-retrieval">Contextual retrieval</a></li>
-<li><a rel="external" href="https://arxiv.org/html/2602.19320v1">Anatomy of agentic memory</a></li>
-<li><a rel="external" href="https://arxiv.org/pdf/2510.05381">Context length alone hurts LLM performance despite perfect retrieval</a></li>
 <li><a rel="external" href="https://www.anthropic.com/engineering/code-execution-with-mcp">Code execution with MCP: building more efficient AI agents</a></li>
 <li><a rel="external" href="https://www.anthropic.com/engineering/advanced-tool-use">Introducing advanced tool use on the Claude developer platform</a></li>
+</ul>
+<p>Papers:</p>
+<ul>
+<li><a rel="external" href="https://arxiv.org/html/2602.19320v1">Anatomy of agentic memory</a></li>
+<li><a rel="external" href="https://arxiv.org/pdf/2510.05381">Context length alone hurts LLM performance despite perfect retrieval</a></li>
+<li><a rel="external" href="https://arxiv.org/abs/2505.06120">LLMs Get Lost In Multi-Turn Conversation</a></li>
 </ul>
 
   </div>
