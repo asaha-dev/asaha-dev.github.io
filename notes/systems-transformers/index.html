@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arpita Saha - Why Building Systems Around Transformers</title>
+  <meta name="description" content="">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400&family=Poppins:ital,wght@0,300;0,400;0,500;1,300&family=Ubuntu:ital,wght@0,300;0,400;1,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="https://asaha-dev.github.io/favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="https://asaha-dev.github.io/favicon.svg">
+  <link rel="stylesheet" href="https://asaha-dev.github.io/style.css">
+  
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="https:&#x2F;&#x2F;asaha-dev.github.io" class="site-name">Arpita Saha</a>
+      <div class="nav-links">
+        <a href="https:&#x2F;&#x2F;asaha-dev.github.io">Home</a>
+        <a href="https://asaha-dev.github.io/work/">Work</a>
+        <a href="https://asaha-dev.github.io/notes/">Notes</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    
+<article>
+  <div class="article-header">
+    <h1>Why building systems around transformers</h1>
+    <div class="article-meta">
+      
+      
+      
+        &middot; 11 min read
+      
+      
+        &middot;
+        
+          <a href="https://asaha-dev.github.io/tags/llm/">#llm</a>&nbsp;
+        
+          <a href="https://asaha-dev.github.io/tags/systems/">#systems</a>
+        
+      
+    </div>
+  </div>
+
+  
+  <nav class="post-toc">
+    <div class="toc-label">in this post</div>
+    <div class="toc-items">
+      
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#the-transformer-architecture-was-designed-for-working-memory">The transformer architecture was designed for working memory</a></div>
+      
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#compression-sounds-easy-until-you-have-to-throw-something-away">Compression sounds easy until you have to throw something away</a></div>
+      
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#most-context-is-not-one-thing">Most context is not one thing</a></div>
+      
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#why-clear-often-helps">Why &#x2F;clear often helps</a></div>
+      
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#the-hidden-role-of-the-harness">The hidden role of the harness</a></div>
+      
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#why-harness-engineering-is-becoming-a-field">Why harness engineering is becoming a field</a></div>
+      
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#the-emerging-architecture">The emerging architecture</a></div>
+      
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#if-long-context-isn-t-memory-why-not-just-compress-it">If Long Context Isn&#x27;t Memory, Why Not Just Compress It?</a></div>
+      
+    </div>
+  </nav>
+  
+
+  <div class="article-body">
+    <p>This is a continuation of a series of posts around LLM systems and how the industry is exploring harness engineering around transformers.</p>
+<p>In a previous post <link>, I discussed how long context should not be conflated with other system components like memory, retrieval etc. A context window is working memory. Memory is what survives after the context window is gone.</p>
+<p>A natural follow-up question is:</p>
+<blockquote>
+<p>If context eventually becomes too large, why don't we just compress it automatically?</p>
+</blockquote>
+<p>At first glance, this seems obvious. Summarize old context, keep the important bits, and continue. In practice, this turns out to be one of the hardest problems in agent architecture.</p>
+<h2 id="the-transformer-architecture-was-designed-for-working-memory">The transformer architecture was designed for working memory</h2>
+<p>Part of the answer starts with the transformer itself. Transformers are fundamentally working-memory systems.</p>
+<p>The original transformer architecture abandoned recurrent state in favor of attention over an explicitly provided sequence. Instead of carrying hidden state forward indefinitely, the model receives a working set of tokens and computes attention relationships across that working set.</p>
+<p>This tradeoff was enormously successful making parallel training possible and scaling improving dramatically leading to large language models emergence. But there was a consequence - the long-term state became somebody else's problem.</p>
+<p>The transformer answers:</p>
+<blockquote>
+<p>Given everything currently available, what should I pay attention to?</p>
+</blockquote>
+<p>It does not answer:</p>
+<blockquote>
+<p>What should I remember forever?</p>
+</blockquote>
+<p>The architecture deliberately avoids that question. As context windows grew from thousands of tokens to hundreds of thousands and eventually millions, it became tempting to treat larger context as a substitute for memory. However, a larger working set is still a working set.</p>
+<h2 id="compression-sounds-easy-until-you-have-to-throw-something-away">Compression sounds easy until you have to throw something away</h2>
+<p>Suppose an agent has accumulated 100,000 tokens of conversation history.</p>
+<p>A simple solution would be:</p>
+<pre><code data-lang="text">100,000 tokens
+      ↓
+summarize
+      ↓
+2,000 tokens
+</code></pre>
+<p>However, the difficulty is not generating the summary and deciding what to discard. <strong>Good compression requires predicting which pieces of information will matter later, often long before the future task is known.</strong></p>
+<p>Imagine a conversation containing:</p>
+<pre><code data-lang="text">User is allergic to peanuts.
+</code></pre>
+<p>At the moment, this fact may seem irrelevant. Hours later, the user asks for dinner recommendations. A summary that omitted the allergy is now wrong - the problem is that future relevance is unknowable. We humans struggle with this too. We routinely forget details that later become important.</p>
+<p>The difference is that people tolerate imperfect memory. Agent systems are often expected to be lossless.</p>
+<h2 id="most-context-is-not-one-thing">Most context is not one thing</h2>
+<p>Another challenge is that conversations contain several different categories of information.</p>
+<p>Some information is state:</p>
+<pre><code data-lang="text">Task 7 completed.
+Task 8 in progress.
+</code></pre>
+<p>Some is memory:</p>
+<pre><code data-lang="text">User prefers markdown reports.
+</code></pre>
+<p>Some is evidence:</p>
+<pre><code data-lang="text">Stack trace
+Log output
+Research paper
+</code></pre>
+<p>Some is instruction:</p>
+<pre><code data-lang="text">Use Python instead of R.
+</code></pre>
+<p>Some is temporary reasoning:</p>
+<pre><code data-lang="text">Hypothesis A failed.
+</code></pre>
+<p>These categories should not be compressed in the same way.</p>
+<p>A single conversation summary flattens all of them into one representation.</p>
+<p>That often destroys exactly the structure the agent needs later.</p>
+<p>The challenge is not compression.</p>
+<p>The challenge is memory formation.</p>
+<p>The system must decide what belongs in state, what belongs in memory, what belongs in storage, and what can safely disappear.</p>
+<h2 id="why-clear-often-helps">Why <code>/clear</code> often helps</h2>
+<p>This is why many Claude Code users discover something surprising:</p>
+<p>Sometimes the best thing you can do is type:</p>
+<pre><code data-lang="bash">/clear
+</code></pre>
+<p>At first glance, this seems irrational.</p>
+<p>If more context is always better, deleting context should make the system worse.</p>
+<p>Yet many practitioners report the opposite.</p>
+<p>The reason is that context is not free.</p>
+<p>As conversations grow, the working set accumulates stale plans, abandoned hypotheses, obsolete instructions, dead ends, temporary reasoning, and partially completed ideas.</p>
+<p>Even if the model can technically access all of this information, it still competes for attention.</p>
+<p>The problem is not that the model forgot something.</p>
+<p>The problem is that it is trying to consider too many things simultaneously.</p>
+<p><code>/clear</code> works because it discards working memory.</p>
+<p>The next session starts with a smaller and cleaner working set.</p>
+<p>This is not evidence that memory is unnecessary.</p>
+<p>It is evidence that working memory and memory serve different purposes.</p>
+<p>Good memory systems make forgetting safe.</p>
+<h2 id="the-hidden-role-of-the-harness">The hidden role of the harness</h2>
+<p>This observation leads directly to one of the most important shifts happening in agent design.</p>
+<p>Increasingly, the intelligence is not living entirely inside the model.</p>
+<p>It is living in the harness around the model.</p>
+<p>Anthropic's work on long-running agents is a good example.</p>
+<p>Their research repeatedly emphasizes artifacts such as:</p>
+<ul>
+<li>progress files</li>
+<li>task lists</li>
+<li>handoff documents</li>
+<li>checkpoints</li>
+<li>git history</li>
+<li>structured state</li>
+</ul>
+<p>These artifacts allow work to continue across sessions even when the context window is reset.</p>
+<p>The model does not remember what happened.</p>
+<p>The harness does.</p>
+<p>Viewed this way, a progress file is a form of episodic memory.</p>
+<p>A task tracker is a state-management system.</p>
+<p>A code repository is an external memory store.</p>
+<p>The harness is increasingly responsible for deciding what information survives and what gets reconstructed later.</p>
+<h2 id="why-harness-engineering-is-becoming-a-field">Why harness engineering is becoming a field</h2>
+<p>This is one reason harness engineering is emerging as its own discipline.</p>
+<p>Early LLM applications focused almost entirely on prompts and models.</p>
+<p>Modern agent systems increasingly focus on everything around the model:</p>
+<ul>
+<li>retrieval</li>
+<li>memory formation</li>
+<li>state management</li>
+<li>checkpointing</li>
+<li>tool discovery</li>
+<li>task decomposition</li>
+<li>execution monitoring</li>
+</ul>
+<p>These systems exist because larger context windows do not solve all continuity problems.</p>
+<p>In many cases they simply postpone them.</p>
+<p>The practical challenge is no longer:</p>
+<blockquote>
+<p>How do I fit more information into context?</p>
+</blockquote>
+<p>The practical challenge is:</p>
+<blockquote>
+<p>What information deserves to survive after context is gone?</p>
+</blockquote>
+<p>That question sits at the intersection of memory, retrieval, state management, and learning.</p>
+<p>It is increasingly where agent architecture is happening.</p>
+<h2 id="the-emerging-architecture">The emerging architecture</h2>
+<p>One way to view the history of language models is that transformers solved working memory extraordinarily well.</p>
+<p>Everything else is now being rebuilt around them.</p>
+<p>Context windows provide active working memory.</p>
+<p>Retrieval systems provide access.</p>
+<p>Memory systems decide what persists.</p>
+<p>State-management systems track ongoing work.</p>
+<p>Harnesses coordinate the entire process.</p>
+<p>The result is starting to look less like a single model with a giant context window and more like a complete cognitive architecture assembled from multiple interacting components.</p>
+<p>The irony is that as context windows get larger, the importance of these external systems appears to be increasing rather than decreasing.</p>
+<p>The problem was never storing more tokens.</p>
+<p>The problem was deciding which tokens matter.</p>
+<h1 id="if-long-context-isn-t-memory-why-not-just-compress-it">If Long Context Isn't Memory, Why Not Just Compress It?</h1>
+<p>In my previous post, I argued that long context and memory are different systems.</p>
+<p>A context window is working memory. Memory is what survives after the context window is gone.</p>
+<p>A natural follow-up question is:</p>
+<blockquote>
+<p>If context eventually becomes too large, why don't we just compress it automatically?</p>
+</blockquote>
+<p>At first glance, this seems obvious. Summarize old context, keep the important bits, and continue.</p>
+<p>In practice, this turns out to be one of the hardest problems in agent architecture.</p>
+<h2 id="the-transformer-architecture-was-designed-for-working-memory-1">The transformer architecture was designed for working memory</h2>
+<p>Part of the answer starts with the transformer itself.</p>
+<p>Transformers are fundamentally working-memory systems.</p>
+<p>The original transformer architecture abandoned recurrent state in favor of attention over an explicitly provided sequence. Instead of carrying hidden state forward indefinitely, the model receives a working set of tokens and computes attention relationships across that working set.</p>
+<p>This tradeoff was enormously successful.</p>
+<p>Parallel training became possible. Scaling improved dramatically. Large language models emerged.</p>
+<p>But there was a consequence.</p>
+<p>Long-term state became somebody else's problem.</p>
+<p>The transformer answers:</p>
+<blockquote>
+<p>Given everything currently available, what should I pay attention to?</p>
+</blockquote>
+<p>It does not answer:</p>
+<blockquote>
+<p>What should I remember forever?</p>
+</blockquote>
+<p>The architecture deliberately avoids that question.</p>
+<p>As context windows grew from thousands of tokens to hundreds of thousands and eventually millions, it became tempting to treat larger context as a substitute for memory.</p>
+<p>It isn't.</p>
+<p>A larger working set is still a working set.</p>
+<h2 id="compression-sounds-easy-until-you-have-to-throw-something-away-1">Compression sounds easy until you have to throw something away</h2>
+<p>Suppose an agent has accumulated 100,000 tokens of conversation history.</p>
+<p>A simple solution would be:</p>
+<pre><code data-lang="text">100,000 tokens
+      ↓
+summarize
+      ↓
+2,000 tokens
+</code></pre>
+<p>The difficulty is not generating the summary.</p>
+<p>The difficulty is deciding what to discard.</p>
+<p>Imagine a conversation containing:</p>
+<pre><code data-lang="text">User is allergic to peanuts.
+</code></pre>
+<p>At the moment, this fact may seem irrelevant.</p>
+<p>Hours later, the user asks for dinner recommendations.</p>
+<p>A summary that omitted the allergy is now wrong.</p>
+<p>The problem is that future relevance is unknowable.</p>
+<p>Good compression requires predicting which pieces of information will matter later, often long before the future task is known.</p>
+<p>Humans struggle with this too. We routinely forget details that later become important.</p>
+<p>The difference is that people tolerate imperfect memory. Agent systems are often expected to be lossless.</p>
+<h2 id="most-context-is-not-one-thing-1">Most context is not one thing</h2>
+<p>Another challenge is that conversations contain several different categories of information.</p>
+<p>Some information is state:</p>
+<pre><code data-lang="text">Task 7 completed.
+Task 8 in progress.
+</code></pre>
+<p>Some is memory:</p>
+<pre><code data-lang="text">User prefers markdown reports.
+</code></pre>
+<p>Some is evidence:</p>
+<pre><code data-lang="text">Stack trace
+Log output
+Research paper
+</code></pre>
+<p>Some is instruction:</p>
+<pre><code data-lang="text">Use Python instead of R.
+</code></pre>
+<p>Some is temporary reasoning:</p>
+<pre><code data-lang="text">Hypothesis A failed.
+</code></pre>
+<p>These categories should not be compressed in the same way.</p>
+<p>A single conversation summary flattens all of them into one representation.</p>
+<p>That often destroys exactly the structure the agent needs later.</p>
+<p>The challenge is not compression.</p>
+<p>The challenge is memory formation.</p>
+<p>The system must decide what belongs in state, what belongs in memory, what belongs in storage, and what can safely disappear.</p>
+<h2 id="why-clear-often-helps-1">Why <code>/clear</code> often helps</h2>
+<p>This is why many Claude Code users discover something surprising:</p>
+<p>Sometimes the best thing you can do is type:</p>
+<pre><code data-lang="bash">/clear
+</code></pre>
+<p>At first glance, this seems irrational.</p>
+<p>If more context is always better, deleting context should make the system worse.</p>
+<p>Yet many practitioners report the opposite.</p>
+<p>The reason is that context is not free.</p>
+<p>As conversations grow, the working set accumulates stale plans, abandoned hypotheses, obsolete instructions, dead ends, temporary reasoning, and partially completed ideas.</p>
+<p>Even if the model can technically access all of this information, it still competes for attention.</p>
+<p>The problem is not that the model forgot something.</p>
+<p>The problem is that it is trying to consider too many things simultaneously.</p>
+<p><code>/clear</code> works because it discards working memory.</p>
+<p>The next session starts with a smaller and cleaner working set.</p>
+<p>This is not evidence that memory is unnecessary.</p>
+<p>It is evidence that working memory and memory serve different purposes.</p>
+<p>Good memory systems make forgetting safe.</p>
+<h2 id="the-hidden-role-of-the-harness-1">The hidden role of the harness</h2>
+<p>This observation leads directly to one of the most important shifts happening in agent design.</p>
+<p>Increasingly, the intelligence is not living entirely inside the model.</p>
+<p>It is living in the harness around the model.</p>
+<p>Anthropic's work on long-running agents is a good example.</p>
+<p>Their research repeatedly emphasizes artifacts such as:</p>
+<ul>
+<li>progress files</li>
+<li>task lists</li>
+<li>handoff documents</li>
+<li>checkpoints</li>
+<li>git history</li>
+<li>structured state</li>
+</ul>
+<p>These artifacts allow work to continue across sessions even when the context window is reset.</p>
+<p>The model does not remember what happened.</p>
+<p>The harness does.</p>
+<p>Viewed this way, a progress file is a form of episodic memory.</p>
+<p>A task tracker is a state-management system.</p>
+<p>A code repository is an external memory store.</p>
+<p>The harness is increasingly responsible for deciding what information survives and what gets reconstructed later.</p>
+<h2 id="why-harness-engineering-is-becoming-a-field-1">Why harness engineering is becoming a field</h2>
+<p>This is one reason harness engineering is emerging as its own discipline.</p>
+<p>Early LLM applications focused almost entirely on prompts and models.</p>
+<p>Modern agent systems increasingly focus on everything around the model:</p>
+<ul>
+<li>retrieval</li>
+<li>memory formation</li>
+<li>state management</li>
+<li>checkpointing</li>
+<li>tool discovery</li>
+<li>task decomposition</li>
+<li>execution monitoring</li>
+</ul>
+<p>These systems exist because larger context windows do not solve all continuity problems.</p>
+<p>In many cases they simply postpone them.</p>
+<p>The practical challenge is no longer:</p>
+<blockquote>
+<p>How do I fit more information into context?</p>
+</blockquote>
+<p>The practical challenge is:</p>
+<blockquote>
+<p>What information deserves to survive after context is gone?</p>
+</blockquote>
+<p>That question sits at the intersection of memory, retrieval, state management, and learning.</p>
+<p>It is increasingly where agent architecture is happening.</p>
+<h2 id="the-emerging-architecture-1">The emerging architecture</h2>
+<p>One way to view the history of language models is that transformers solved working memory extraordinarily well.</p>
+<p>Everything else is now being rebuilt around them.</p>
+<p>Context windows provide active working memory.</p>
+<p>Retrieval systems provide access.</p>
+<p>Memory systems decide what persists.</p>
+<p>State-management systems track ongoing work.</p>
+<p>Harnesses coordinate the entire process.</p>
+<p>The result is starting to look less like a single model with a giant context window and more like a complete cognitive architecture assembled from multiple interacting components.</p>
+<p>The irony is that as context windows get larger, the importance of these external systems appears to be increasing rather than decreasing.</p>
+<p>The problem was never storing more tokens.</p>
+<p>The problem was deciding which tokens matter.</p>
+
+  </div>
+</article>
+
+
+
+  </main>
+
+  <footer>
+    <div class="social-links">
+      <a href="https://www.linkedin.com/in/arpitas" title="LinkedIn" aria-label="LinkedIn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+        </svg>
+      </a>
+      <a href="mailto:saha.arpita@gmail.com" title="Email" aria-label="Email">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="2" y="4" width="20" height="16" rx="2"/>
+          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+        </svg>
+      </a>
+    </div>
+  </footer>
+</body>
+</html>
