@@ -383,7 +383,16 @@ nav {
   font-style: italic;
 }
 
-.article-body strong { font-weight: 500; }
+.article-body strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.article-body em {
+  color: var(--text);
+  font-style: italic;
+  font-weight: 500;
+}
 
 .article-body a {
   color: #6ecad6;
@@ -427,6 +436,14 @@ nav {
   height: auto;
   display: block;
   margin: 1.5rem auto;
+}
+
+.article-body .answer-indent {
+  margin: 0.35rem 0 1.3rem 1.5rem;
+}
+
+.article-body .answer-indent p:last-child {
+  margin-bottom: 0;
 }
 
 /* ============================================================

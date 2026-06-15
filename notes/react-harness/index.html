@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Arpita Saha - From React To Agent Harness: How To Think About The Shift</title>
-  <meta name="description" content="I&#x27;ve been thinking through the shift from ReAct loops to engineered agent harnesses — what drove it, what the architecture actually looks like, and how to drive…">
+  <meta name="description" content="I&#x27;ve been thinking through the shift from ReAct loops to engineered agent harnesses. ReAct is still a useful mental model, but the loop by itself no longer expl…">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400&family=Poppins:ital,wght@0,300;0,400;0,500;1,300&family=Ubuntu:ital,wght@0,300;0,400;1,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -34,7 +34,7 @@
       
       
       
-        &middot; 14 min read
+        &middot; 9 min read
       
       
         &middot;
@@ -52,13 +52,13 @@
     <div class="toc-label">in this post</div>
     <div class="toc-items">
       
-      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#lens-1-architecture-design">Lens 1 — Architecture &#x2F; design</a></div>
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#lens-1-architecture-and-design-where-the-flat-loop-breaks">lens 1: architecture and design — where the flat loop breaks</a></div>
       
-      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#lens-2-build-framework-choices">Lens 2 — Build &#x2F; framework choices</a></div>
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#lens-2-build-and-framework-choices-what-to-own-directly">lens 2: build and framework choices — what to own directly</a></div>
       
-      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#lens-3-strategic-org">Lens 3 — Strategic &#x2F; org</a></div>
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#lens-3-strategy-and-organization-how-to-make-decisions">lens 3: strategy and organization — how to make decisions</a></div>
       
-      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#some-additional-insights-from-the-industry">Some additional insights from the industry.</a></div>
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#does-the-model-eat-the-harness">Does the model eat the harness?</a></div>
       
       <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#what-i-was-reading">What I was reading</a></div>
       
@@ -67,10 +67,11 @@
   
 
   <div class="article-body">
-    <p>I've been thinking through the shift from ReAct loops to engineered agent harnesses — what drove it, what the architecture actually looks like, and how to drive decisions for teams building on LLMs today.</p>
+    <p>I've been thinking through the shift from ReAct loops to engineered agent harnesses. ReAct is still a useful mental model, but the loop by itself no longer explains where production agent systems succeed or fail.</p>
 <span id="continue-reading"></span>
 <p><em>This is the first post in a series on LLM systems: why the industry is moving away from "just give the model more context" and toward explicit memory formation, orchestration systems and harness engineering. The series goes deeper in <a href="/notes/context-memory">context and memory</a>, <a href="/notes/systems-transformers">building systems around transformers</a>, and <a href="/notes/claude-code-systems-deep-dive">Claude Code — a systems architecture deep dive</a>.</em></p>
-<p>ReAct (<a rel="external" href="https://arxiv.org/abs/2210.03629">Yao et al., 2022</a>) was widely popular in 2022–2023 for building AI applications on large language models. The core idea was neat: let the model interleave reasoning traces with tool calls in one flat loop. Instead of forcing the LLM to either think internally and answer (<code>User → LLM → Answer</code>) or call tools immediately (<code>User → LLM → Tool → LLM → Answer</code>), you alternate between thought, action, and observation — possibly repeating — before arriving at an answer.</p>
+<p>The core architectural change is that the reasoning loop is no longer the whole system. It is one component inside a harness: a deterministic orchestration layer around a non-deterministic model that explicitly owns context, control flow, state, tools, and verification.</p>
+<p>ReAct was widely popular in 2022–2023 for building AI applications on large language models. The core idea was neat: let the model interleave reasoning traces with tool calls in one flat loop. Instead of forcing the LLM to either think internally and answer (<code>User → LLM → Answer</code>) or call tools immediately (<code>User → LLM → Tool → LLM → Answer</code>), you alternate between thought, action, and observation — possibly repeating — before arriving at an answer.</p>
 <p>For example:</p>
 <pre><code>Question:
 Who is the current CEO of Nvidia?
@@ -91,72 +92,61 @@ Answer:
 Jensen Huang
 </code></pre>
 <p>This became the blueprint for most modern agents. ReAct became the dominant pattern for early LangChain agents and tool-calling implementations. LangGraph later emerged as a more structured alternative — adding explicit state and control flow in response to the flat loop's limitations at scale.</p>
-<p>An agent harness is the systems idea that wraps it: a <strong>deterministic orchestration layer around a non-deterministic model</strong> that explicitly owns context, control flow, and verification. We are not replacing the reasoning loop — we are demoting it from the whole system to one component inside a scaffold that we engineer. The harness is what you build, specific to your task. A framework — LangChain, LangGraph, CrewAI — is tooling that helps you build a harness, or provides one off the shelf. The two are often conflated, and the difference matters more than it might seem at first.</p>
-<p>Anthropic's <a rel="external" href="https://docs.anthropic.com/en/docs/claude-code/sdk">Claude Agent SDK</a> frames the canonical harness loop as <code>gather context → take action → verify work → repeat</code>. The verify stage is a meaningful addition that classic ReAct does not have — it externalises judgment rather than asking the model to self-critique.</p>
-<p>I explored this transition through three lenses:</p>
-<h2 id="lens-1-architecture-design">Lens 1 — Architecture / design</h2>
-<p><strong>Why the single loop breaks at scale</strong></p>
-<p>A pure ReAct loop dumps every thought, action, and observation into one growing context window. This triggers what Anthropic's <a rel="external" href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">context engineering research</a> calls "context rot" — recall accuracy degrades as token count climbs, because the transformer's attention budget is finite. A few reference points on the scale of this problem:</p>
-<ul>
-<li>Laban et al.'s <a rel="external" href="https://arxiv.org/abs/2505.06120">"LLMs Get Lost In Multi-Turn Conversation"</a> (2025) measured an average 39% performance drop across six generation tasks in multi-turn versus single-turn settings, across 200,000+ simulated conversations. The mechanism is specific: models make assumptions in early turns, prematurely commit to a direction, and then fail to recover when that direction proves wrong — a flat loop has no structure to interrupt this.</li>
-<li>Stanford's <a rel="external" href="https://arxiv.org/abs/2307.03172">"lost in the middle"</a> research (Liu et al., 2023) documents a related failure mode: performance degrades significantly when relevant information appears in the middle of long contexts, even in models that technically process all tokens.</li>
-<li>Anthropic <a rel="external" href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">documented the concrete failure mode</a> in practice: the model runs out of context mid-task and leaves work half-implemented, or a later instance prematurely declares the job done.</li>
-</ul>
-<p>The harness patterns that address this are fundamentally context-management moves:</p>
-<ul>
-<li><strong>Context engineering</strong> — runtime curation of the optimal token set during inference; a discipline distinct from prompt engineering</li>
-<li><strong>Compaction</strong> — summarises a near-full window, reinitialises fresh</li>
-<li><strong>Structured note-taking</strong> — persists state outside the window: progress files, JSON feature lists, git log</li>
-<li><strong>Sub-agent isolation</strong> — sub-agents explore in clean windows, return only a ~1–2K token distilled summary</li>
-<li><strong>Verification/critic loop</strong> — a separate evaluator agent judges the work</li>
-<li><strong>Workflow decomposition</strong> — predefined code paths instead of one autonomous loop</li>
-</ul>
-<p>The concrete architecture that makes these patterns work is a three-component split: <strong>session</strong> (an append-only event log outside the context window — the thing that survives failures and restarts), <strong>harness</strong> (a stateless orchestrator that calls the model and encodes no model-specific assumptions), and <strong>sandbox</strong> (ephemeral execution environments provisioned as tools, called via a simple <code>execute(name, input) → string</code> interface). The harness calls the sandbox; the sandbox returns a string. Keeping the harness stateless and the interfaces stable is what allows the orchestration logic to evolve as model capabilities do without rewriting the whole system.</p>
-<p>Two findings worth noting for anyone in a decision-making seat:</p>
-<ol>
-<li><strong>Compaction alone is not sufficient</strong> — the <a href="/notes/context-memory">context and memory</a> and <a href="/notes/systems-transformers">building systems around transformers</a> posts cover this in detail. The short version: <em>state lives in artifacts, not in the context window.</em></li>
-<li><strong>Separate the doer from the judge</strong> — there is a well-documented self-preference bias (<a rel="external" href="https://arxiv.org/abs/2404.13076">arXiv 2404.13076</a>, NeurIPS 2024). A standalone evaluator is more tunable than a self-critical generator. Anthropic's <a rel="external" href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents">long-running harness</a> uses a planner + generator + evaluator pattern running multi-hour sessions, with the evaluator driving a browser to test like a user. Also worth noting: <strong>rules-based verification (linting, tests, visual checks)</strong> should not be discarded in favour of LLM-as-judge. The latter enables novel verification pathways but is less robust and higher latency.</li>
-</ol>
-<h2 id="lens-2-build-framework-choices">Lens 2 — Build / framework choices</h2>
+<p>An agent harness is the systems idea that wraps it. The harness is what you build around the model for a specific task. A framework — LangChain, LangGraph, CrewAI, an SDK — is tooling that helps you build a harness, or provides one off the shelf. The distinction matters because the harness is where context, state, verification, and recovery decisions live.</p>
+<p>A useful canonical harness loop is <code>gather context → take action → verify work → repeat</code>. The verify stage is a meaningful addition that classic ReAct does not have — it externalises judgment rather than asking the model to self-critique.</p>
+<p>I find the transition easiest to reason about through three lenses:</p>
+<h2 id="lens-1-architecture-and-design-where-the-flat-loop-breaks">lens 1: architecture and design — where the flat loop breaks</h2>
+<p>A pure ReAct loop dumps every thought, action, and observation into one growing context window. That works surprisingly well for short tasks. It starts to fail when the loop becomes the only place where state lives.</p>
+<p>The failure mode is not simply that the model forgets. The context window fills with stale plans, abandoned hypotheses, intermediate outputs, tool traces, and partial decisions. Even when the model can technically see the tokens, the relevant state has to compete with everything else.</p>
+<p>The architecture that addresses this usually separates three things:</p>
+<blockquote>
+<p><strong>session</strong> — an append-only event log that survives failures and restarts.<br />
+<strong>harness</strong> — the orchestration layer that decides what context to load, what action to take, and how to verify it.<br />
+<strong>sandbox</strong> — the execution boundary for tools, shell commands, browser checks, code execution, or remote environments.</p>
+</blockquote>
+<p>This split matters because the flat loop has no durable place to put truth. Imagine an agent refactoring a codebase. It investigates three approaches, abandons one after tests fail, edits several files, and then gets compacted. If all of that lives only in the conversation, the next model call has to infer current state from a compressed narrative. The summary may preserve the final decision but lose why an earlier approach failed. It may preserve the todo list but lose which tests already ran.</p>
+<p>In a harnessed system, those categories separate - the repository records the actual state of the work; a progress file or task list records what remains and the session log records what happened. The sandbox provides the execution boundary. The model can still reason over all of this, but it is no longer responsible for being the only state store.</p>
+<p><strong>Q1. What design choices are critical?</strong></p>
+<div class="answer-indent">
+<p><strong>a. State.</strong> Compaction alone is not enough because state lives in artifacts, not in the context window. Progress files, task lists, session logs, repositories, and test results give the system durable places to put truth.</p>
+<p><strong>b. Evaluation.</strong> Separate the doer from the judge. A standalone evaluator is more tunable than asking the generator to validate its own work. Rules-based verification — linting, tests, visual checks — still matters.</p>
+</div>
+<h2 id="lens-2-build-and-framework-choices-what-to-own-directly">lens 2: build and framework choices — what to own directly</h2>
 <p>The question of which framework to use is real, but it is downstream of a more important one: how much of the harness do you want to own directly? A framework gives you pre-built abstractions — graph nodes, agent roles, tool connectors, memory stores — in exchange for structural decisions made on your behalf. When those decisions match your task, frameworks accelerate. When they don't, they add layers to debug between you and the loop.</p>
-<p>I did not find comparative claims against LangGraph, OpenAI Agents SDK, CrewAI, Google ADK, or AutoGen that survived adversarial verification — most benchmarks are vendor-produced or task-specific.</p>
-<p>Anthropic's <a rel="external" href="https://www.anthropic.com/research/building-effective-agents">building effective agents</a> post articulates a build-your-own-first philosophy worth quoting directly:</p>
-<blockquote>
-<p>We suggest that developers start by using LLM APIs directly: many patterns can be implemented in a few lines of code. If you do use a framework, ensure you understand the underlying code. Incorrect assumptions about what's under the hood are a common source of customer error.</p>
-</blockquote>
-<p>They name five composable workflow patterns as structured alternatives to a monolithic loop: prompt chaining, routing, parallelisation, orchestrator-workers, and evaluator-optimizer. Most teams need these, not a full autonomous agent.</p>
-<p>A rough decision framework I use:</p>
-<ul>
-<li><strong>Raw loop + direct API</strong> — when I want to understand the harness and the patterns are simple</li>
-<li><strong>Framework like Claude Agent SDK or others</strong> — when I want harness concerns solved for me: automatic compaction, sub-agent context isolation, first-class verification. Use Claude Agent SDK if your org is already Claude-centric; otherwise consider OpenAI Agents SDK, CrewAI, AutoGen, or Google ADK depending on whether role/crew abstractions or cloud-native integration matter more.</li>
-<li><strong>LangGraph</strong> — when I need explicit graph/state-machine control over deterministic orchestration and the most control over execution paths</li>
-</ul>
-<p>The lesson here is that <strong>the framework is not the moat — it is one way to build toward one. The harness, context curation, and evals are.</strong> A framework that hides the loop from you is a liability exactly because the loop is where the differentiation lives: how you manage context, what you verify, how you recover from failure. You can build that on top of LangGraph or on top of raw API calls. What you cannot do is outsource it.</p>
-<h2 id="lens-3-strategic-org">Lens 3 — Strategic / org</h2>
+<p>The build-your-own-first philosophy resonates with me here. Start close to the API when the patterns are simple, and use a framework when you understand enough of the loop to know which complexity it is taking off your plate.</p>
+<p><strong>Q1. How do I choose an appropriate framework?</strong></p>
+<div class="answer-indent">
+<p>Use a raw loop and direct API when you want to understand the harness and the patterns are simple. Use a framework or SDK when you want harness concerns solved for you: automatic compaction, sub-agent context isolation, permissions, tool execution, or first-class verification. Use LangGraph when you need explicit graph or state-machine control over deterministic orchestration.</p>
+<p>The risk shows up when the framework owns the part of the system where the product differentiates: what context gets loaded, what state survives, how work is verified, how failures recover, and how evals map to user trust. Those are not incidental implementation details. They are often the product behavior.
+</div>
+<p><strong>Q2. What should I avoid outsourcing?</strong></p>
+<div class="answer-indent">
+<p>The parts of the loop where the product differentiates: how context gets curated, what state survives, how work is verified, how failures recover, and how evals map to user trust. The framework is not the moat - the harness, context curation, and evals are.</p>
+</div>
+<h2 id="lens-3-strategy-and-organization-how-to-make-decisions">lens 3: strategy and organization — how to make decisions</h2>
 <p>Some of the questions that come up in practice:</p>
-<p><strong>Where does durable advantage live?</strong>
-The model is often rented, a rapidly commoditising input — everyone gets the next frontier model if they're willing to pay for it. What compounds inside the org is more concrete than it sounds: the <strong>session log</strong> (durable, append-only, the thing that survives model failures and harness restarts), the <strong>stateless harness</strong> (orchestration logic that can evolve without being coupled to a specific model's behaviour), and the <strong>eval infrastructure</strong> (the thing that tells you when a model upgrade helps or hurts your task). Anthropic's own <a rel="external" href="https://www.anthropic.com/engineering/managed-agents">managed-agents</a> work found that decoupling these three components dropped time-to-first-token roughly 60% at the median and over 90% at the 95th percentile — not because the model got faster, but because the architecture stopped paying costs it didn't need to. Invest the team's engineering hours in these three things, not in chasing model-level optimisations that the next frontier release will absorb anyway.</p>
-<p><strong>Build vs buy</strong>
-If starting today, I would build a thin direct-API wrapper first to learn where the tasks actually break — then adopt a framework only once I understand the loop well enough to know what it's hiding from me. The org's capability to build the harness is the asset. Outsourcing the harness outsources the most valuable part.</p>
-<p><strong>How to frame the transition to stakeholders</strong>
-Most people who are not deep in this space perceive an LLM as one unit — you ask a question, you get an answer. Proposing a harness system can come across as overkill to anyone not watching what's happening beneath the ChatGPT or Claude interface. The narrative "we're moving from clever prompts to engineered systems" is hard to land cold.</p>
-<p>The reframe that tends to work: "we're moving from asking the model to do everything, to engineering the conditions under which it succeeds." This shifts the conversation from AI capability — which most stakeholders can't evaluate — to system design, which they can. A useful analogy to use: <strong>the model is the engine. We're building the car. A powerful engine without a drivetrain, steering, and brakes isn't a vehicle you can use in production.</strong></p>
-<p><strong>Which pattern for which job?</strong></p>
-<p>The field debate between single and multi-agent could not be louder. However, my read is that <a rel="external" href="https://cognition.ai/blog/dont-build-multi-agents">Cognition's "Don't build multi-agents"</a> and <a rel="external" href="https://www.anthropic.com/news/claude-for-life-sciences">Anthropic's life sciences system</a> are not contradicting each other — they are describing different tasks. The productive question is not which camp is right but which pattern fits the work.</p>
-<p><em>Use single-agent for dependency-heavy, coherent-output work.</em> Code, documents, anything where later steps depend on earlier ones. Cognition's finding was precise: the failure mode is not multi-agent in general, it is parallel agents making conflicting implicit assumptions about shared output. A reviewer agent with fresh context is fine and often valuable — parallel writers on the same codebase are not.</p>
-<p><em>Use multi-agent for parallelisable, breadth-first work that exceeds one context window.</em> Research, competitive analysis, broad search, synthesis — tasks where outputs are independent and combined at the end. Anthropic's life sciences system (outperforming human baseline on Protocol QA with connectors to Benchling, PubMed, BioRender, and 10x Genomics) and Google's <a rel="external" href="https://arxiv.org/abs/2502.18864">AI co-scientist</a> ("generate, debate, evolve" across biomedical hypothesis generation, independently discovering a novel gene transfer mechanism that matched unpublished experimental results) are both in this category. The task structure justifies the coordination overhead.</p>
-<p><em>Design the interfaces before the agents.</em> This is the recommendation that makes the pattern choice reversible. With stable session / harness / sandbox interfaces — the harness calls the sandbox via a defined contract, the session log holds state outside the context window — you can add a reviewer agent, switch from single to multi, or change the execution environment without rewriting the system. Without stable interfaces, each architectural change becomes a rewrite.</p>
-<p><em>Consider the cost.</em> Anthropic's <a rel="external" href="https://www.anthropic.com/engineering/multi-agent-research-system">multi-agent research system</a> is direct about the spend:</p>
-<blockquote>
-<p>In practice, these architectures burn through tokens fast. In our data, agents typically use about 4× more tokens than chat interactions, and multi-agent systems use about 15× more tokens than chats.</p>
-</blockquote>
-<p>Run the expensive pattern only where the task genuinely justifies it.</p>
-<h2 id="some-additional-insights-from-the-industry">Some additional insights from the industry.</h2>
-<p>A more fundamental challenge to the harness thesis comes from a different direction than the single-vs-multi debate.</p>
-<p>Logan Kilpatrick, in a <a rel="external" href="https://sequoiacap.com/podcast/google-deepminds-logan-kilpatrick-why-the-model-eats-the-harness/">Sequoia Capital podcast</a> (June 2025), argued that the scaffolding being built around models — tool-calling systems, agent harnesses, orchestration layers — has roughly a 12-month shelf life before capabilities migrate natively into model weights. The model eats the harness. What gets built today becomes commoditised into the next frontier release. The definition of "the model" has already expanded to encompass tool calling, containers, and agent harness functions that were external only a couple of years ago; Kilpatrick's argument is that this expansion continues.</p>
-<p>Kangwook Lee <a rel="external" href="https://x.com/Kangwook_Lee/status/2052925157606568217">makes a more structural version of the same point</a>. He proposes three zones of model capability: below a threshold, models cannot do the task regardless of harness quality; in the middle zone, the harness is the deciding variable; above the threshold, models are capable enough that human-designed harnesses become the bottleneck rather than the enabler. His group showed that for mid-sized models, AI-designed harnesses already outperform human-designed ones through iterative engineering. If that generalises upward, human harness engineering becomes a constraint at exactly the moment when model capability makes the constraint most visible.</p>
-<p>My thinking is that that both arguments are right about the direction; the timing to be seen. Anthropic's engineering confirms part of the premise; their post on <a rel="external" href="https://www.anthropic.com/engineering/managed-agents">managed agents</a> work describes finding that harness workarounds written for earlier Claude models became dead weight as the model improved; scaffolding built around "context anxiety" in older versions was eliminated by a single model upgrade. Their design response was not to stop building harnesses, but to make the harness encode no model-specific assumptions — opinionated about the interfaces (session manipulation, sandbox execution) but agnostic about implementation. The session and sandbox interfaces stay stable; the harness logic is free to change. That is the more actionable response to the critics: build for interface stability, not implementation permanence.</p>
-<p>The architectural choices in Lens 1 and 2 — which context management patterns to adopt, how to structure verification, which framework to use — are not just engineering decisions. They determine what your org can build, how fast you can iterate on evals, and whether you own the most valuable layer of the stack or rent it.</p>
+<p><strong>Q1. Where does durable advantage live?</strong></p>
+<div class="answer-indent">
+<p>The model is often rented. What compounds inside the org is the session log, the harness, and the eval infrastructure. The session log preserves what happened. The harness encodes how the system works. The evals tell you when a model upgrade helps or hurts your task.</p>
+</div>
+<p><strong>Q2. Build vs buy</strong></p>
+<div class="answer-indent">
+<p>If starting today, I would build a thin direct-API wrapper first to learn where the tasks actually break — then adopt a framework only once I understand the loop well enough to know what it's hiding from me. The org's capability to build the harness is the asset. Outsourcing the harness outsources the most valuable part.</p>
+</div>
+<p><strong>Q3. How to frame the transition to stakeholders</strong></p>
+<div class="answer-indent">
+<p>Most people who are not deep in this space perceive an LLM as one unit: you ask a question, you get an answer. The reframe that tends to work is: "we're moving from asking the model to do everything, to engineering the conditions under which it succeeds." That shifts the conversation from AI capability, which many stakeholders cannot evaluate, to system design, which they can.</p>
+</div>
+<p><strong>Q4. Which pattern for which job?</strong></p>
+<div class="answer-indent">
+<p>The field debate between single and multi-agent could not be louder. However, my read is that the strongest arguments on both sides are not actually contradicting each other — they are describing different tasks. The productive question is not which camp is right but which pattern fits the work.</p>
+<p>Use a single-agent pattern for dependency-heavy, coherent-output work: code, documents, anything where later steps depend on earlier ones. Use multi-agent patterns for parallelisable, breadth-first work: research, competitive analysis, broad search, synthesis. Design the interfaces before the agents so the pattern choice remains reversible.</p>
+</div>
+<h2 id="does-the-model-eat-the-harness">Does the model eat the harness?</h2>
+<p>The strongest version of the critique is that tool-calling systems, orchestration layers, and other scaffolding have a short shelf life before capabilities migrate into the model itself. Some of that is clearly true. Workarounds written for weaker models can become dead weight as the model improves.</p>
+<p>That does not make the harness irrelevant. It changes what kind of harness work is worth doing.</p>
+<p>Model-specific scaffolding decays quickly but interfaces decay more slowly. A workaround for a weak model may become obsolete with the next release, but a clean separation between session state, sandbox execution, verification, and context loading still gives the system room to evolve.</p>
+<p>That is my direction: build the harness so the unstable parts can be replaced. Keep the session and sandbox interfaces stable. Keep verification explicit. Keep evals close to the decisions they support. Let the orchestration logic change as model capability changes.</p>
 <hr />
 <h2 id="what-i-was-reading">What I was reading</h2>
 <p>Papers:</p>
@@ -175,13 +165,14 @@ Most people who are not deep in this space perceive an LLM as one unit — you a
 <li><a rel="external" href="https://docs.anthropic.com/en/docs/claude-code/sdk">Claude Agent SDK</a></li>
 <li><a rel="external" href="https://www.anthropic.com/research/building-effective-agents">Building effective agents</a></li>
 <li><a rel="external" href="https://www.anthropic.com/engineering/managed-agents">Managed agents</a></li>
+<li><a rel="external" href="https://www.anthropic.com/engineering/multi-agent-research-system">How we built our multi-agent research system</a></li>
 </ul>
-<p>Cognition AI blog</p>
+<p>Cognition AI blog:</p>
 <ul>
 <li><a rel="external" href="https://cognition.ai/blog/dont-build-multi-agents">Don't build multi-agents</a></li>
 <li><a rel="external" href="https://cognition.ai/blog/multi-agents-working">Multi-agents working</a></li>
 </ul>
-<p>Other sources</p>
+<p>Other sources:</p>
 <ul>
 <li><a rel="external" href="https://sequoiacap.com/podcast/google-deepminds-logan-kilpatrick-why-the-model-eats-the-harness/">Why the model eats the harness</a> — Logan Kilpatrick, Sequoia Capital podcast</li>
 <li><a rel="external" href="https://x.com/Kangwook_Lee/status/2052925157606568217">Three regimes and AI-designed harnesses</a> — Kangwook Lee</li>

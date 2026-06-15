@@ -249,5 +249,20 @@ article > p:first-of-type {
 }
 
 .article-body strong {
-  font-weight: 600;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.article-body em {
+  color: var(--text);
+  font-style: italic;
+  font-weight: 500;
+}
+
+.article-body .answer-indent {
+  margin: 0.35rem 0 1.3rem 1.5rem;
+}
+
+.article-body .answer-indent p:last-child {
+  margin-bottom: 0;
 }
