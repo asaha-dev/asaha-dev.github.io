@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400&family=Libre+Baskerville:wght@400;700&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="https://asaha-dev.github.io/favicon.svg">
   <link rel="icon" type="image/svg+xml" href="https://asaha-dev.github.io/favicon.svg">
-  <link rel="stylesheet" href="https://asaha-dev.github.io/style.css?h=396ab41093f5e6c1996e">
+  <link rel="stylesheet" href="https://asaha-dev.github.io/style.css?h=984d9acab79708a15535">
   
 </head>
 <body>
@@ -58,9 +58,9 @@
       
       <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#lens-3-strategy-and-organization-how-to-make-decisions">lens 3: strategy and organization: how to make decisions</a></div>
       
-      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#does-the-model-eat-the-harness">Does the model eat the harness?</a></div>
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#does-the-model-eat-the-harness">does the model eat the harness?</a></div>
       
-      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#what-i-was-reading">What I was reading</a></div>
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/react-harness/#what-i-was-reading">what I was reading</a></div>
       
     </div>
   </nav>
@@ -139,17 +139,17 @@ Jensen Huang
 <p><strong>Q4. Which pattern for which job?</strong></p>
 <div class="answer-indent">
 <p>The field debate between single and multi-agent could not be louder. However, my read is that the strongest arguments on both sides are not actually contradicting each other but are describing different tasks. The productive question is not which camp is right but which pattern fits the work.</p>
-<p>-> Use a single-agent pattern for dependency-heavy, coherent-output work: code, documents, anything where later steps depend on earlier ones. 
-->Use multi-agent patterns for parallelisable, breadth-first work: research, competitive analysis, broad search, synthesis. 
-->Taking a leaf from the software development best practices - **design the interfaces before the agents so the pattern choice remains reversible.**</p>
+<p>-> Use a single-agent pattern for dependency-heavy, coherent-output work: code, documents, anything where later steps depend on earlier ones.<br>
+-> Use multi-agent patterns for parallelisable, breadth-first work: research, competitive analysis, broad search, synthesis.<br>
+-> Taking a leaf from the software development best practices - <strong>design the interfaces before the agents so the pattern choice remains reversible.</strong></p>
 </div>
-<h2 id="does-the-model-eat-the-harness">Does the model eat the harness?</h2>
+<h2 id="does-the-model-eat-the-harness">does the model eat the harness?</h2>
 <p>The strongest version of the critique is that tool-calling systems, orchestration layers, and other scaffolding have a short shelf life before capabilities migrate into the model itself. Some of that is clearly true. Workarounds written for weaker models can become dead weight as the model improves.</p>
 <p>That does not make the harness irrelevant. It changes what kind of harness work is worth doing.</p>
 <p>Model-specific scaffolding decays quickly but interfaces decay more slowly. A workaround for a weak model may become obsolete with the next release, but a clean separation between session state, sandbox execution, verification, and context loading still gives the system room to evolve.</p>
 <p>That is my direction: build the harness so the unstable parts can be replaced. Keep the session and sandbox interfaces stable. Keep verification explicit. Keep evals close to the decisions they support. Let the orchestration logic change as model capability changes.</p>
 <hr />
-<h2 id="what-i-was-reading">What I was reading</h2>
+<h2 id="what-i-was-reading">what I was reading</h2>
 <p>Papers:</p>
 <ul>
 <li><a rel="external" href="https://arxiv.org/abs/2210.03629">ReAct: Synergizing Reasoning and Acting in Language Models</a>, 2022</li>

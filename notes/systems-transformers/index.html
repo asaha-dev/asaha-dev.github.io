@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400&family=Libre+Baskerville:wght@400;700&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="https://asaha-dev.github.io/favicon.svg">
   <link rel="icon" type="image/svg+xml" href="https://asaha-dev.github.io/favicon.svg">
-  <link rel="stylesheet" href="https://asaha-dev.github.io/style.css?h=396ab41093f5e6c1996e">
+  <link rel="stylesheet" href="https://asaha-dev.github.io/style.css?h=984d9acab79708a15535">
   
 </head>
 <body>
@@ -50,21 +50,21 @@
     <div class="toc-label">in this post</div>
     <div class="toc-items">
       
-      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#the-transformer-architecture-was-designed-for-working-memory">The transformer architecture was designed for working memory</a></div>
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#the-transformer-architecture-was-designed-for-working-memory">the transformer architecture was designed for working memory</a></div>
       
       <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#compression-sounds-easy-until-you-have-to-throw-something-away">Compression sounds easy until you have to throw something away</a></div>
       
-      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#most-context-is-not-one-thing">Most context is not one thing</a></div>
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#most-context-is-not-one-thing">most context is not one thing</a></div>
       
-      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#why-clear-and-compact-exist">Why &#x2F;clear and &#x2F;compact exist</a></div>
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#why-clear-and-compact-exist">why &#x2F;clear and &#x2F;compact exist</a></div>
       
       <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#the-hidden-role-of-the-harness">The hidden role of the harness</a></div>
       
-      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#why-harness-engineering-is-becoming-a-field">Why harness engineering is becoming a field</a></div>
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#why-harness-engineering-is-becoming-a-field">why harness engineering is becoming a field</a></div>
       
-      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#the-emerging-architecture">The emerging architecture</a></div>
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#the-emerging-architecture">the emerging architecture</a></div>
       
-      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#what-i-was-reading">What I was reading</a></div>
+      <div class="toc-item"><a href="https://asaha-dev.github.io/notes/systems-transformers/#what-i-was-reading">what I was reading</a></div>
       
     </div>
   </nav>
@@ -81,7 +81,7 @@
 <p>If context eventually becomes too large, why don't we just compress it automatically?</p>
 </blockquote>
 <p>At first glance, this seems obvious. Summarize old context, keep the important bits, and continue. In practice, this turns out to be one of the hardest problems in agent architecture.</p>
-<h2 id="the-transformer-architecture-was-designed-for-working-memory">The transformer architecture was designed for working memory</h2>
+<h2 id="the-transformer-architecture-was-designed-for-working-memory">the transformer architecture was designed for working memory</h2>
 <p>Part of the answer starts with the transformer itself. Transformers are fundamentally working-memory systems.</p>
 <p>The original transformer architecture abandoned recurrent state in favor of attention over an explicitly provided sequence. Instead of carrying hidden state forward indefinitely, the model receives a working set of tokens and computes attention relationships across that working set.</p>
 <p>This tradeoff was enormously successful — parallel training became possible, scaling improved dramatically, and large language models emerged. But there was a consequence: long-term state became somebody else's problem.</p>
@@ -108,7 +108,7 @@ summarize
 <pre><code data-lang="text">User is allergic to peanuts.
 </code></pre>
 <p>At the moment, this fact may seem irrelevant. Hours later, the user asks for dinner recommendations. A summary that omitted the allergy is now wrong - the problem is that future relevance is unknowable. We humans struggle with this too. We routinely forget details that later become important. The difference is that people tolerate imperfect memory. <strong>Agent systems are often expected to be lossless.</strong></p>
-<h2 id="most-context-is-not-one-thing">Most context is not one thing</h2>
+<h2 id="most-context-is-not-one-thing">most context is not one thing</h2>
 <p>Another challenge is that conversations contain several different categories of information. Some information is state:</p>
 <pre><code data-lang="text">Task 7 completed.
 Task 8 in progress.
@@ -128,7 +128,7 @@ Research paper
 <pre><code data-lang="text">Hypothesis A failed.
 </code></pre>
 <p>These categories should not be compressed in the same way. A single conversation summary flattens all of them into one representation, which often destroys exactly the structure the agent needs later. <strong>The challenge, then, is not compression but memory formation. The system must decide what belongs in state, what belongs in memory, what belongs in storage, and what can safely disappear.</strong></p>
-<h2 id="why-clear-and-compact-exist">Why <code>/clear</code> and <code>/compact</code> exist</h2>
+<h2 id="why-clear-and-compact-exist">why <code>/clear</code> and <code>/compact</code> exist</h2>
 <p>Claude Code ships with two commands for managing context. <code>/clear</code> discards the working memory entirely and starts fresh. <code>/compact</code> summarizes the conversation and continues with a compressed version.</p>
 <p>Both exist for the same underlying reason: context accumulates noise faster than signal. As conversations grow, the working set fills with stale plans, abandoned hypotheses, obsolete instructions, dead ends, temporary reasoning, and partially completed ideas. Even when the model can technically access all of it, the information competes for attention. <strong>The problem is not that the model forgot something. The problem is that it is trying to consider too many things simultaneously.</strong></p>
 <p>Claude Code does also run automatic compaction. An auto-compact stage fires when context pressure reaches a threshold — the pipeline summarises without waiting for user input, because the alternative is the model running out of context mid-task. This is the technical floor: when the window would otherwise overflow, the system handles it.</p>
@@ -151,7 +151,7 @@ Research paper
 <li>A code repository is an external memory store.</li>
 </ul>
 <p>The harness is increasingly responsible for deciding what information survives and what gets reconstructed later.</p>
-<h2 id="why-harness-engineering-is-becoming-a-field">Why harness engineering is becoming a field</h2>
+<h2 id="why-harness-engineering-is-becoming-a-field">why harness engineering is becoming a field</h2>
 <p>This is one reason harness engineering is emerging as its own discipline. Early LLM applications focused almost entirely on prompts and models. Modern agent systems increasingly focus on everything around the model:</p>
 <ul>
 <li>retrieval</li>
@@ -172,12 +172,12 @@ Research paper
 <p>What information deserves to survive after context is gone?</p>
 </blockquote>
 <p>That question sits at the intersection of memory, retrieval, state management, and learning. It is increasingly where agent architecture is happening.</p>
-<h2 id="the-emerging-architecture">The emerging architecture</h2>
+<h2 id="the-emerging-architecture">the emerging architecture</h2>
 <p>One way to view the history of language models is that transformers solved working memory extraordinarily well. Everything else is now being rebuilt around them. Context windows provide active working memory; retrieval systems provide access; memory systems decide what persists; state-management systems track ongoing work; harnesses coordinate the entire process.</p>
 <p>The result is starting to look less like a single model with a giant context window and more like a complete cognitive architecture assembled from multiple interacting components.</p>
 <p>As context windows get larger, the importance of these external systems appears to be increasing rather than decreasing. This is why harness engineering is gaining popularity — it is where the continuity problem is actually being solved.</p>
 <hr />
-<h2 id="what-i-was-reading">What I was reading</h2>
+<h2 id="what-i-was-reading">what I was reading</h2>
 <p>Anthropic blog posts on <a rel="external" href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Effective context engineering for AI agents</a> and <a rel="external" href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents">Effective harnesses for long-running agents</a></p>
 
   </div>
