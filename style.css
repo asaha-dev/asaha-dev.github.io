@@ -281,10 +281,27 @@ nav {
 
 .post-tags {
   font-family: var(--font-sans);
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  white-space: nowrap;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  flex-wrap: wrap;
   flex-shrink: 0;
+}
+
+.post-tags a {
+  color: var(--color-name);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 0.08rem 0.45rem;
+}
+
+.post-tags a:hover {
+  opacity: 0.7;
 }
 
 .post-excerpt {
@@ -548,6 +565,16 @@ footer {
    ============================================================ */
 @media (max-width: 500px) {
   html { font-size: 16px; }
+
+  .post-info {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .post-tags {
+    justify-content: flex-start;
+  }
 
   .post-item {
     grid-template-columns: 1fr;
